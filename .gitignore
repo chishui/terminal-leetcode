@@ -1,0 +1,8 @@
+/build
+/dist
+Makefile
+/*.egg-info
+*.pyc
+/.git
+.DS_Store
+
