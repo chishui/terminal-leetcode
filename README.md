@@ -2,10 +2,12 @@
 Terminal-Leetcode
 ============================
 Terminal-Leetcode is a terminal based leetcode website viewer. It's not that obvious to use
-terminal to view quizzes than use a web browser. 
+terminal to view quizzes than use a web browser.  
 This project is inspired by RTV.
 # Requirements
-Python 2.7  
+- Python 2.7  
+- [Urwid](https://github.com/urwid/urwid)
+
 # Installation
 Clone the repository  
 ```
