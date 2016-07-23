@@ -4,6 +4,8 @@ Terminal-Leetcode
 Terminal-Leetcode is a terminal based leetcode website viewer. It's not that obvious to use
 terminal to view quizzes than use a web browser.  
 This project is inspired by RTV.
+![alt text](screenshots/list.png "quiz list" )
+![alt text](screenshots/detail.png "quiz detail")
 # Requirements
 - Python 2.7  
 - [Urwid](https://github.com/urwid/urwid)
