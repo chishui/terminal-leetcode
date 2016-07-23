@@ -8,16 +8,16 @@ requirements = ['urwid', 'requests', 'bs4']
 
 setup(
     name = "terminal-leetcode",
-    version = "0.0.1",
+    version = "0.0.2",
     author = "Liyun Xiu",
     author_email = "chishui2@gmail.com",
-    description = ("An demonstration of how to create, document, and publish "
-                                   "to the cheese shop a5 pypi.org."),
+    description = "A terminal based leetcode website viewer",
     license = "MIT",
     keywords = "leetcode terminal urwid",
     url = "https://github.com/chishui/terminal-leetcode",
     packages=['leetcode'],
     long_description=read('README.md'),
+    include_package_data=True,
     install_requires=requirements,
     entry_points={'console_scripts': ['leetcode=leetcode.__main__:main']},
     #classifiers=[
