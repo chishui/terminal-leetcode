@@ -13,7 +13,7 @@ Clone the repository
 ```
  $ git clone https://github.com/chishui/terminal-leetcode.git  
  $ cd terminal-leetcode  
- $ python setup.py install  
+ $ sudo python setup.py install  
 ```
 # Usage
 To run the program, input leetcode in terminal    

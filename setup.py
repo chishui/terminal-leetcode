@@ -17,7 +17,7 @@ setup(
     keywords = "leetcode terminal urwid",
     url = "https://github.com/chishui/terminal-leetcode",
     packages=['leetcode'],
-    long_description=read('README'),
+    long_description=read('README.md'),
     install_requires=requirements,
     entry_points={'console_scripts': ['leetcode=leetcode.__main__:main']},
     #classifiers=[
