@@ -11,6 +11,10 @@ This project is inspired by RTV.
 - [Urwid](https://github.com/urwid/urwid)
 
 # Installation
+Install with pip  
+```
+ $ pip install terminal-leetcode
+```
 Clone the repository  
 ```
  $ git clone https://github.com/chishui/terminal-leetcode.git  
@@ -34,7 +38,7 @@ Vim's moving keys ``h``, ``j``, ``k``, ``l`` are supported.
 - Test
 - User login
 - Quiz list sort
-- Install with pip
+- ~~Install with pip~~
 - Get quiz default code interface
 
 # Contribute
