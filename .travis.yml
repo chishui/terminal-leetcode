@@ -2,5 +2,6 @@ language: python
 python:
   - "2.7"
 install:
-  - pip install bs4 requests urwid
+  - pip install bs4 requests urwid pytest
 script:
+    py.test -v
