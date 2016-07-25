@@ -33,6 +33,15 @@ To run the program, input leetcode in terminal
 ```
  $ leetcode
 ```
+### Login
+To login you need to create a config.cfg file in folder ~/.config/leetcode.  
+Input your username and password in config.cfg as:  
+```
+[leetcode]
+username=chishui
+password=123456
+```
+Then restart this program.
 # Controls:
 - Press ``H`` to see help infomation.  
 - Press ``up`` and ``down`` to go through quiz list.  
