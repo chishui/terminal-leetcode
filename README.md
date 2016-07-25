@@ -1,9 +1,9 @@
 ============================
 Terminal-Leetcode
 ============================
-Terminal-Leetcode is a terminal based leetcode website viewer. It's not that obvious to use
-terminal to view quizzes than use a web browser.  
+Terminal-Leetcode is a terminal based leetcode website viewer.  
 This project is inspired by RTV.
+
 ![alt text](screenshots/list.png "quiz list" )
 ![alt text](screenshots/detail.png "quiz detail")
 # Requirements
@@ -26,7 +26,6 @@ To run the program, input leetcode in terminal
 ```
  $ leetcode
 ```
-Quiz list will only be retrieved once from leetcode website, then the webpage will be stored locally.   
 # Controls:
 - Press ``H`` to see help infomation.  
 - Press ``up`` and ``down`` to go through quiz list.  
@@ -36,7 +35,7 @@ Vim's moving keys ``h``, ``j``, ``k``, ``l`` are supported.
 
 # TODO
 - Test
-- User login
+- ~~User login~~
 - Quiz list sort
 - ~~Install with pip~~
 - Get quiz default code interface

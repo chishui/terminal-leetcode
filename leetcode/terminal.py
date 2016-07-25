@@ -8,9 +8,15 @@ class ItemWidget(urwid.WidgetWrap):
         self.id = data.id
         self.data = data
         lockbody = 'body' if not self.data.lock else 'lock'
+        pass_symbol = u''
+        if data.pass_status == 'ac':
+            pass_symbol = u'\u2714'
+        elif data.pass_status == 'notac':
+            pass_symbol = u'\u2718'
         self.item = [
             ('fixed', 15, urwid.Padding(urwid.AttrWrap(
-                urwid.Text(' %s' % str(data.id)), lockbody, 'focus'), left=2)),
+                urwid.Text(' %s %s' % (str(data.id), pass_symbol)),
+                lockbody, 'focus'), left=2)),
             urwid.AttrWrap(urwid.Text('%s' % data.title), lockbody, 'focus'),
             (15, urwid.AttrWrap(urwid.Text('%s' % data.acceptance), lockbody, 'focus')),
             (15, urwid.AttrWrap(urwid.Text('%s' % data.difficulty), lockbody, 'focus')),
@@ -51,8 +57,8 @@ class DetailView(object):
 
 palette = [
     ('body', 'dark cyan', ''),
-    ('focus', 'dark red', ''),
-    ('head', 'light gray', ''),
+    ('focus', 'white', ''),
+    ('head', 'white', 'dark gray'),
     ('lock', 'dark gray', '')
     ]
 
@@ -96,6 +102,7 @@ class Terminal(object):
         if input_text is 'R':
             items = self.leetcode.hard_retrieve_home()
             self.home_view = self.make_listview(items)
+            self.view_stack = []
             self.goto_view(self.home_view)
 
         if self.is_home and (input_text is 'l' or input_text is 'enter' or input_text is 'right'):
@@ -119,7 +126,7 @@ class Terminal(object):
 
     def make_listview(self, data):
         items = self.make_itemwidgets(data)
-        header = urwid.AttrMap(urwid.Text(''), 'head')
+        header = self.make_header()
         self.listbox = urwid.ListBox(urwid.SimpleListWalker(items))
         self.home_view = urwid.Frame(urwid.AttrWrap(self.listbox, 'body'), header=header)
         return self.home_view
@@ -143,14 +150,38 @@ class Terminal(object):
 
     def make_itemwidgets(self, data):
         items = []
-        title = QuizItem('#', 'Title', 'Url', 'Acceptance', 'Difficulty')
+        header = {}
+        header['pass'] = 'None'
+        header['id'] = '#'
+        header['title'] = 'Title'
+        header['url'] = 'Url'
+        header['acceptance'] = 'Acceptance'
+        header['difficulty'] = 'Difficulty'
+        header['lock'] = False
+        title = QuizItem(header)
         items.append(ItemWidget(title, False))
         for item in data:
             items.append(ItemWidget(item))
         return items
 
+    def make_header(self):
+        if self.leetcode.is_login:
+            columns = [
+                ('fixed', 15, urwid.Padding(urwid.AttrWrap(
+                    urwid.Text('%s' % self.leetcode.config.username),
+                    'head', ''), left=2)),
+                urwid.AttrWrap(urwid.Text('You have solved %d / %d problems. ' %
+                    (len(self.leetcode.solved), len(self.leetcode.items))), 'head', ''),
+            ]
+            return urwid.Columns(columns)
+        else:
+            text = urwid.AttrWrap(urwid.Text('Not login'), 'head')
+        return text
+
+
     def run(self):
-        data = self.leetcode.retrieve_home()
+        self.leetcode.login()
+        data = self.leetcode.hard_retrieve_home()
         self.home_view = self.make_listview(data)
         self.loop = urwid.MainLoop(self.home_view, palette, unhandled_input=self.keystroke)
         self.view_stack.append(self.home_view)

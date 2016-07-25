@@ -1,9 +1,10 @@
 
 class QuizItem(object):
-    def __init__(self, id, title, url, acceptance, difficulty, lock=False):
-        self.id = id
-        self.title = title
-        self.url = url
-        self.acceptance = acceptance
-        self.difficulty = difficulty
-        self.lock = lock
+    def __init__(self, data):
+        self.id = data['id']
+        self.title = data['title']
+        self.url = data['url']
+        self.acceptance = data['acceptance']
+        self.difficulty = data['difficulty']
+        self.lock = data['lock']
+        self.pass_status = data['pass']#'None', 'ac', 'notac'
