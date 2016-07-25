@@ -71,6 +71,7 @@ class Terminal(object):
         self.help_view = None
         self.quit_confirm_view = None
         self.view_stack = []
+        self.detail_view = None
 
     @property
     def current_view(self):
@@ -122,7 +123,8 @@ class Terminal(object):
         return self.quit_confirm_view
 
     def make_detailview(self, title, body):
-        return DetailView(title=title, body=body).build()
+        self.detail_view = DetailView(title=title, body=body).build()
+        return self.detail_view
 
     def make_listview(self, data):
         items = self.make_itemwidgets(data)

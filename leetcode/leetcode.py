@@ -1,4 +1,5 @@
 import os
+import re
 import requests
 from bs4 import BeautifulSoup
 from .config import Config
@@ -73,6 +74,15 @@ class Leetcode(object):
         bs = BeautifulSoup(text, 'html.parser')
         title = bs.find('div', 'question-title').h3.text
         body = bs.find('div', 'question-content').text.replace(chr(13), '')
+        # get sample code
+        rawCode = bs.find("div", attrs={"ng-controller": "AceCtrl as aceCtrl"}).attrs["ng-init"]
+        language = format_language_text(self.config.language)
+        pattern = "\\'text\\':\s\\'%s\\',\s\\'defaultCode\\':\s\\'(.*?)\\'" % language
+        content = re.search(pattern, rawCode).group(1).\
+              encode("utf-8").decode("unicode-escape").\
+              replace("\r\n", "\n")
+        body += '\n\n--SAMPLE CODE--\n\n' + content
+        item.sample_code = content
         return title, body
 
     def login(self):
@@ -99,6 +109,11 @@ class Leetcode(object):
             return None
 
         return r.text
+
+def format_language_text(language):
+    language = language.replace('+', '\+')
+    language = language.replace('#', '\#')
+    return language
 
 def save_data_to_file(data, filename):
     filepath = os.path.dirname(filename)

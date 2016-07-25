@@ -12,17 +12,24 @@ class Config(object):
     keys are:
         username
         password
+        language
     '''
     def __init__(self):
-        self.parser = ConfigParser.ConfigParser()
+        self.parser = ConfigParser.SafeConfigParser({'username' : '','password' : '',
+            'language' : 'C++'})
         self.username = None
         self.password = None
+        self.language = 'C++'
 
     def load(self):
         if not os.path.exists(CONFIG_FILE):
             return False
 
         self.parser.read(CONFIG_FILE)
+        if 'leetcode' not in self.parser.sections():
+            return False
+
         self.username = self.parser.get('leetcode', 'username')
         self.password = self.parser.get('leetcode', 'password')
+        self.language = self.parser.get('leetcode', 'language')
         return True

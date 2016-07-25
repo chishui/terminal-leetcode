@@ -42,6 +42,17 @@ username=chishui
 password=123456
 ```
 Then restart this program.
+### Program Language
+You can set your program language in config.cfg as:
+```
+[leetcode]
+........
+language=Java
+```
+to see default sample code in quiz detail view in your favorate language.  
+Please make sure to use Leetcode support program languages and use the string exactly 
+the same as it appears in Leetcode.    
+Default language is C++.
 # Controls:
 - Press ``H`` to see help infomation.  
 - Press ``up`` and ``down`` to go through quiz list.  

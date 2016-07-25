@@ -8,3 +8,5 @@ class QuizItem(object):
         self.difficulty = data['difficulty']
         self.lock = data['lock']
         self.pass_status = data['pass']#'None', 'ac', 'notac'
+        self.sample_code = None
+
