@@ -1,59 +1,6 @@
 import urwid
-from .model import QuizItem
 from .leetcode import Leetcode
-
-class ItemWidget(urwid.WidgetWrap):
-    def __init__(self, data, sel=True):
-        self.sel = sel
-        self.id = data.id
-        self.data = data
-        lockbody = 'body' if not self.data.lock else 'lock'
-        pass_symbol = u''
-        if data.pass_status == 'ac':
-            pass_symbol = u'\u2714'
-        elif data.pass_status == 'notac':
-            pass_symbol = u'\u2718'
-        self.item = [
-            ('fixed', 15, urwid.Padding(urwid.AttrWrap(
-                urwid.Text(' %s %s' % (str(data.id), pass_symbol)),
-                lockbody, 'focus'), left=2)),
-            urwid.AttrWrap(urwid.Text('%s' % data.title), lockbody, 'focus'),
-            (15, urwid.AttrWrap(urwid.Text('%s' % data.acceptance), lockbody, 'focus')),
-            (15, urwid.AttrWrap(urwid.Text('%s' % data.difficulty), lockbody, 'focus')),
-        ]
-        #text = str(id).ljust(15) + title[:80].ljust(80) +
-        #acceptance.ljust(15) + difficulty.ljust(15)
-        #self.item = [
-            #urwid.AttrWrap(urwid.Text(text), 'body', 'focus')
-        #]
-        w = urwid.Columns(self.item)
-        super(ItemWidget, self).__init__(w)
-
-    def selectable(self):
-        return self.sel and not self.data.lock
-
-    def keypress(self, size, key):
-        if key == 'j':
-            return 'down'
-        if key == 'k':
-            return 'up'
-        if key == 'h':
-            return 'left'
-        if key == 'l':
-            return 'right'
-        return key
-
-class DetailView(object):
-    def __init__(self, title, body):
-        self.title = title
-        self.body = body
-
-    def build(self):
-        view_title = urwid.AttrWrap(urwid.Text(self.title), 'body')
-        view_text = urwid.Text(self.body)
-        view_body = urwid.Pile([view_title, view_text])
-        view_fill = urwid.Filler(view_body)
-        return view_fill
+from .views import HomeView, DetailView, HelpView
 
 palette = [
     ('body', 'dark cyan', ''),
@@ -65,7 +12,6 @@ palette = [
 class Terminal(object):
     def __init__(self):
         self.home_view = None
-        self.listbox = None
         self.loop = None
         self.leetcode = Leetcode()
         self.help_view = None
@@ -95,26 +41,32 @@ class Terminal(object):
                 raise urwid.ExitMainLoop()
             else:
                 self.go_back()
-                return
 
-        if input_text in ('q', 'Q'):
+        elif input_text in ('q', 'Q'):
             self.goto_view(self.make_quit_confirmation())
 
-        if input_text is 'R':
+        elif input_text is 'R':
             items = self.leetcode.hard_retrieve_home()
             self.home_view = self.make_listview(items)
             self.view_stack = []
             self.goto_view(self.home_view)
 
-        if self.is_home and (input_text is 'l' or input_text is 'enter' or input_text is 'right'):
-            title, body = self.leetcode.retrieve_detail(self.listbox.get_focus()[0].data)
-            self.goto_view(self.make_detailview(title, body))
+        elif self.is_home and (input_text is 'l' or input_text is 'enter' or input_text is 'right'):
+            if self.detail_view and self.detail_view.title == self.home_view.listbox.get_focus()[0].data.title:
+                self.goto_view(self.detail_view)
+            else:
+                title, body, code = self.leetcode.retrieve_detail(self.home_view.listbox.get_focus()[0].data)
+                self.goto_view(self.make_detailview(title, body, code))
 
-        if not self.is_home and (input_text is 'left' or input_text is 'h'):
+        elif not self.is_home and (input_text is 'left' or input_text is 'h'):
             self.go_back()
 
-        if input_text is 'H':
-            self.goto_view(self.make_helpview())
+        elif input_text is 'H':
+            if not self.help_view:
+                self.make_helpview()
+            self.goto_view(self.help_view)
+        else:
+            return input_text
 
     def make_quit_confirmation(self):
         text = urwid.AttrMap(urwid.Text('Do you really want to quit ? (y/n)'), 'body')
@@ -122,49 +74,14 @@ class Terminal(object):
                                                ('relative', 100), 'bottom', None)
         return self.quit_confirm_view
 
-    def make_detailview(self, title, body):
-        self.detail_view = DetailView(title=title, body=body).build()
+    def make_detailview(self, title, body, code):
+        self.detail_view = DetailView(title=title, body=body, code=code)
         return self.detail_view
 
     def make_listview(self, data):
-        items = self.make_itemwidgets(data)
         header = self.make_header()
-        self.listbox = urwid.ListBox(urwid.SimpleListWalker(items))
-        self.home_view = urwid.Frame(urwid.AttrWrap(self.listbox, 'body'), header=header)
+        self.home_view = HomeView(data, header)
         return self.home_view
-
-    def make_helpview(self):
-        if self.help_view:
-            return self.help_view
-        title = urwid.AttrWrap(urwid.Text('Help'), 'body')
-        body = urwid.Text('''
-                j: down
-                k: up
-                l/enter: see quiz detail
-                h: go to quiz list
-                q: quit
-                H: help
-                R: retrieve quiz list from website
-        ''')
-        pile = urwid.Pile([title, body])
-        self.help_view = urwid.Filler(pile)
-        return self.help_view
-
-    def make_itemwidgets(self, data):
-        items = []
-        header = {}
-        header['pass'] = 'None'
-        header['id'] = '#'
-        header['title'] = 'Title'
-        header['url'] = 'Url'
-        header['acceptance'] = 'Acceptance'
-        header['difficulty'] = 'Difficulty'
-        header['lock'] = False
-        title = QuizItem(header)
-        items.append(ItemWidget(title, False))
-        for item in data:
-            items.append(ItemWidget(item))
-        return items
 
     def make_header(self):
         if self.leetcode.is_login:
@@ -180,6 +97,9 @@ class Terminal(object):
             text = urwid.AttrWrap(urwid.Text('Not login'), 'head')
         return text
 
+    def make_helpview(self):
+        self.help_view = HelpView()
+        return self.help_view
 
     def run(self):
         self.leetcode.login()

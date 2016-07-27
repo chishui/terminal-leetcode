@@ -15,8 +15,8 @@ class Config(object):
         language
     '''
     def __init__(self):
-        self.parser = ConfigParser.SafeConfigParser({'username' : '','password' : '',
-            'language' : 'C++'})
+        self.parser = ConfigParser.SafeConfigParser({'username' : '', 'password' : '',
+                                                     'language' : 'C++'})
         self.username = None
         self.password = None
         self.language = 'C++'

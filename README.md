@@ -5,7 +5,7 @@ Terminal-Leetcode is a terminal based leetcode website viewer.
 This project is inspired by RTV.
 
 ![alt text](screenshots/list.png "quiz list" )
-![alt text](screenshots/detail.png "quiz detail")
+<!--![alt text](screenshots/detail.png "quiz detail")-->
 ---------------
 
 [![Build Status](https://travis-ci.org/chishui/terminal-leetcode.svg?branch=master)](https://travis-ci.org/chishui/terminal-leetcode)
@@ -58,6 +58,7 @@ Default language is C++.
 - Press ``up`` and ``down`` to go through quiz list.  
 - Press ``enter`` or ``right`` to see a quiz detail, and press ``left`` to go back.  
 - Press ``R`` in quiz list view to retrieve quiz from website.  
+- Press ``PageUp`` or ``PageDown`` to go to prev or next page.  
 Vim's moving keys ``h``, ``j``, ``k``, ``l`` are supported.
 
 # TODO
@@ -65,7 +66,7 @@ Vim's moving keys ``h``, ``j``, ``k``, ``l`` are supported.
 - ~~User login~~
 - Quiz list sort
 - ~~Install with pip~~
-- Get quiz default code interface
+- ~~Get quiz default code interface~~
 
 # Contribute
 All kinds of contributions are welcome.

@@ -71,6 +71,7 @@ class Leetcode(object):
 
     def retrieve_detail(self, item):
         text = self.retrieve(BASE_URL + item.url).encode('utf-8')
+        text = text.replace('</ br>', '')
         bs = BeautifulSoup(text, 'html.parser')
         title = bs.find('div', 'question-title').h3.text
         body = bs.find('div', 'question-content').text.replace(chr(13), '')
@@ -81,9 +82,7 @@ class Leetcode(object):
         content = re.search(pattern, rawCode).group(1).\
               encode("utf-8").decode("unicode-escape").\
               replace("\r\n", "\n")
-        body += '\n\n--SAMPLE CODE--\n\n' + content
-        item.sample_code = content
-        return title, body
+        return title, body, content
 
     def login(self):
         if not self.config.username or not self.config.password:
