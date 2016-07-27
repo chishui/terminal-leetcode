@@ -10,6 +10,10 @@ def vim_key_map(key):
         return 'left'
     if key == 'l':
         return 'right'
+    if key == 'ctrl f':
+        return 'page down'
+    if key == 'ctrl b':
+        return 'page up'
     return key
 
 class ItemWidget(urwid.WidgetWrap):
@@ -23,9 +27,10 @@ class ItemWidget(urwid.WidgetWrap):
             pass_symbol = u'\u2714'
         elif data.pass_status == 'notac':
             pass_symbol = u'\u2718'
+        text = str(data.id).ljust(4) + pass_symbol
         self.item = [
             ('fixed', 15, urwid.Padding(urwid.AttrWrap(
-                urwid.Text(' %s %s' % (str(data.id), pass_symbol)),
+                urwid.Text(text),
                 lockbody, 'focus'), left=2)),
             urwid.AttrWrap(urwid.Text('%s' % data.title), lockbody, 'focus'),
             (15, urwid.AttrWrap(urwid.Text('%s' % data.acceptance), lockbody, 'focus')),
@@ -83,16 +88,23 @@ class HelpView(urwid.Frame):
     def __init__(self):
         title = urwid.AttrWrap(urwid.Text('Help'), 'body')
         body = urwid.Text('''
+        basic:
                 'UP' or 'k'                 : up
                 'DOWN' or 'j'               : down
                 'LEFT' or 'h'               : go to quiz list
                 'RIGHT' or 'ENTER' or 'l'   : see quiz detail
                 'PageUp'                    : see previous page
                 'PageDown'                  : see next page
-
+        sort:
+                '1'                         : sort by id
+                '2'                         : sort by title
+                '3'                         : sort by acceptance
+                '4'                         : sort by difficulty
+        others:
                 'q'                         : quit
                 'H'                         : help
                 'R'                         : retrieve quiz list from website
+                'f'                         : search quiz by id
         ''')
         pile = urwid.Pile([title, body])
         filler = urwid.Filler(pile)
@@ -108,30 +120,57 @@ class HelpView(urwid.Frame):
 
 class HomeView(urwid.Frame):
     def __init__(self, data, header):
+        title = [
+            ('fixed', 15, urwid.Padding(urwid.AttrWrap(
+                urwid.Text('#'),
+                'body', 'focus'), left=2)),
+            urwid.AttrWrap(urwid.Text('Title'), 'body', 'focus'),
+            (15, urwid.AttrWrap(urwid.Text('Acceptance'), 'body', 'focus')),
+            (15, urwid.AttrWrap(urwid.Text('Difficulty'), 'body', 'focus')),
+        ]
+        title_column = urwid.Columns(title)
         items = make_itemwidgets(data)
         self.listbox = urwid.ListBox(urwid.SimpleListWalker(items))
-        urwid.Frame.__init__(self, urwid.AttrWrap(self.listbox, 'body'), header=header)
+        header_pile = urwid.Pile([header, title_column])
+        urwid.Frame.__init__(self, urwid.AttrWrap(self.listbox, 'body'), header=header_pile)
+        self.last_sort = {'attr': 'id', 'reverse': True}
+
+    def sort_list(self, attr, cmp=None):
+        if attr == self.last_sort['attr']:
+            self.last_sort['reverse'] = not self.last_sort['reverse']
+        else:
+            self.last_sort['reverse'] = False
+            self.last_sort['attr'] = attr
+
+        self.listbox.body.sort(key=lambda x: getattr(x.data, attr),
+                               reverse=self.last_sort['reverse'],
+                               cmp=cmp)
+
+    def difficulty_cmp(self, x, y):
+        d = {'Easy': 0, 'Medium': 1, 'Hard': 2}
+        x = d[x]
+        y = d[y]
+        return cmp(x, y)
 
     def keypress(self, size, key):
+        key = vim_key_map(key)
         ignore_key = ('h', 'left')
         if key in ignore_key:
             pass
+        elif key is '1':
+            self.sort_list('id')
+        elif key is '2':
+            self.sort_list('title')
+        elif key is '3':
+            self.sort_list('acceptance')
+        elif key is '4':
+            self.sort_list('difficulty', cmp=self.difficulty_cmp)
         else:
             return urwid.Frame.keypress(self, size, key)
 
 
 def make_itemwidgets(data):
     items = []
-    header = {}
-    header['pass'] = 'None'
-    header['id'] = '#'
-    header['title'] = 'Title'
-    header['url'] = 'Url'
-    header['acceptance'] = 'Acceptance'
-    header['difficulty'] = 'Difficulty'
-    header['lock'] = False
-    title = QuizItem(header)
-    items.append(ItemWidget(title, False))
     for item in data:
         items.append(ItemWidget(item))
     return items

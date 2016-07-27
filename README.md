@@ -59,12 +59,19 @@ Default language is C++.
 - Press ``enter`` or ``right`` to see a quiz detail, and press ``left`` to go back.  
 - Press ``R`` in quiz list view to retrieve quiz from website.  
 - Press ``PageUp`` or ``PageDown`` to go to prev or next page.  
-Vim's moving keys ``h``, ``j``, ``k``, ``l`` are supported.
+- Press ``f`` to search quiz by id
+- Press ``1`` to sort quiz list by id
+- Press ``2`` to sort quiz list by title
+- Press ``3`` to sort quiz list by acceptance
+- Press ``4`` to sort quiz list by difficulty  
+Vim's moving keys ``h``, ``j``, ``k``, ``l``, ``ctrl+f``, ``ctrl+b`` are supported.
+
+
 
 # TODO
 - Test
 - ~~User login~~
-- Quiz list sort
+- ~~Quiz list sort~~
 - ~~Install with pip~~
 - ~~Get quiz default code interface~~
 

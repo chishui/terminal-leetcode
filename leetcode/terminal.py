@@ -18,6 +18,7 @@ class Terminal(object):
         self.quit_confirm_view = None
         self.view_stack = []
         self.detail_view = None
+        self.search_view = None
 
     @property
     def current_view(self):
@@ -35,44 +36,62 @@ class Terminal(object):
         self.view_stack.pop()
         self.loop.widget = self.current_view
 
-    def keystroke(self, input_text):
+    def keystroke(self, key):
         if self.quit_confirm_view and self.current_view == self.quit_confirm_view:
-            if input_text is 'y':
+            if key is 'y':
                 raise urwid.ExitMainLoop()
             else:
                 self.go_back()
 
-        elif input_text in ('q', 'Q'):
+        elif self.current_view == self.search_view and key is 'enter':
+            text = self.search_view.contents[1][0].original_widget.get_edit_text()
+            for i, item in enumerate(self.home_view.listbox.contents()):
+                if item[0].data.id == text:
+                    self.home_view.listbox.focus_position = i
+                    break
+            self.go_back()
+
+        elif key in ('q', 'Q'):
             self.goto_view(self.make_quit_confirmation())
 
-        elif input_text is 'R':
+        elif key is 'R':
             items = self.leetcode.hard_retrieve_home()
             self.home_view = self.make_listview(items)
             self.view_stack = []
             self.goto_view(self.home_view)
 
-        elif self.is_home and (input_text is 'l' or input_text is 'enter' or input_text is 'right'):
-            if self.detail_view and self.detail_view.title == self.home_view.listbox.get_focus()[0].data.title:
-                self.goto_view(self.detail_view)
-            else:
-                title, body, code = self.leetcode.retrieve_detail(self.home_view.listbox.get_focus()[0].data)
-                self.goto_view(self.make_detailview(title, body, code))
+        elif self.is_home and (key is 'l' or key is 'enter' or key is 'right'):
+            if  self.home_view.listbox.get_focus()[0].selectable():
+                if self.detail_view and self.detail_view.title == self.home_view.listbox.get_focus()[0].data.title:
+                    self.goto_view(self.detail_view)
+                else:
+                    title, body, code = self.leetcode.retrieve_detail(self.home_view.listbox.get_focus()[0].data)
+                    self.goto_view(self.make_detailview(title, body, code))
 
-        elif not self.is_home and (input_text is 'left' or input_text is 'h'):
+        elif not self.is_home and (key is 'left' or key is 'h'):
             self.go_back()
 
-        elif input_text is 'H':
+        elif key is 'H':
             if not self.help_view:
                 self.make_helpview()
             self.goto_view(self.help_view)
+        elif self.is_home and key is 'f':
+            self.make_search_view()
+            self.goto_view(self.search_view)
         else:
-            return input_text
+            return key
 
     def make_quit_confirmation(self):
         text = urwid.AttrMap(urwid.Text('Do you really want to quit ? (y/n)'), 'body')
         self.quit_confirm_view = urwid.Overlay(text, self.current_view, 'left',
                                                ('relative', 100), 'bottom', None)
         return self.quit_confirm_view
+
+    def make_search_view(self):
+        text = urwid.AttrMap(urwid.Edit('Search by id: ', ''), 'body')
+        self.search_view = urwid.Overlay(text, self.current_view, 'left',
+                                               ('relative', 100), 'bottom', None)
+        return self.search_view
 
     def make_detailview(self, title, body, code):
         self.detail_view = DetailView(title=title, body=body, code=code)

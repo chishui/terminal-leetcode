@@ -71,7 +71,7 @@ class Leetcode(object):
 
     def retrieve_detail(self, item):
         text = self.retrieve(BASE_URL + item.url).encode('utf-8')
-        text = text.replace('</ br>', '')
+        text = text.replace('<br>', '')
         bs = BeautifulSoup(text, 'html.parser')
         title = bs.find('div', 'question-title').h3.text
         body = bs.find('div', 'question-content').text.replace(chr(13), '')
