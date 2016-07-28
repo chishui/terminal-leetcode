@@ -9,6 +9,13 @@ palette = [
     ('lock', 'dark gray', '')
     ]
 
+def is_string_an_integer(s):
+    try:
+        int(s)
+        return True
+    except ValueError:
+        return False
+
 class Terminal(object):
     def __init__(self):
         self.home_view = None
@@ -43,13 +50,17 @@ class Terminal(object):
             else:
                 self.go_back()
 
-        elif self.current_view == self.search_view and key is 'enter':
-            text = self.search_view.contents[1][0].original_widget.get_edit_text()
-            for i, item in enumerate(self.home_view.listbox.contents()):
-                if item[0].data.id == text:
-                    self.home_view.listbox.focus_position = i
-                    break
-            self.go_back()
+        elif self.current_view == self.search_view:
+            if key is 'enter':
+                text = self.search_view.contents[1][0].original_widget.get_edit_text()
+                if text != '' and is_string_an_integer(text):
+                    for i, item in enumerate(self.home_view.listbox.body):
+                        if item.data.id == int(text):
+                            self.home_view.listbox.focus_position = i
+                            break
+                self.go_back()
+            elif key is 'esc':
+                self.go_back()
 
         elif key in ('q', 'Q'):
             self.goto_view(self.make_quit_confirmation())
