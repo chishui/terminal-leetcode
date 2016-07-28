@@ -20,6 +20,8 @@ class Config(object):
         self.username = None
         self.password = None
         self.language = 'C++'
+        self.ext = None
+        self.path = None
 
     def load(self):
         if not os.path.exists(CONFIG_FILE):
@@ -32,4 +34,7 @@ class Config(object):
         self.username = self.parser.get('leetcode', 'username')
         self.password = self.parser.get('leetcode', 'password')
         self.language = self.parser.get('leetcode', 'language')
+        self.ext = self.parser.get('leetcode', 'ext')
+        self.path = self.parser.get('leetcode', 'path')
+        self.path = os.path.expanduser(self.path)
         return True

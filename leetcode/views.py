@@ -1,4 +1,6 @@
+import os
 import urwid
+import subprocess
 from .model import QuizItem
 
 def vim_key_map(key):
@@ -52,10 +54,12 @@ class ItemWidget(urwid.WidgetWrap):
 
 
 class DetailView(urwid.Frame):
-    def __init__(self, title, body, code):
+    def __init__(self, title, body, code, id, config):
         self.title = title
         self.body = body
         self.code = code
+        self.id = id
+        self.config = config
         blank = urwid.Divider()
         view_title = urwid.AttrWrap(urwid.Text(self.title), 'body')
         view_text = urwid.Text(self.body)
@@ -80,8 +84,20 @@ class DetailView(urwid.Frame):
         ignore_key = ('l', 'right', 'enter')
         if key in ignore_key:
             pass
+        if key is 'e':
+            self.edit_code()
         else:
             return urwid.Frame.keypress(self, size, key)
+
+    def edit_code(self):
+        if not os.path.exists(self.config.path):
+            os.makedirs(self.config.path)
+        filepath = os.path.join(self.config.path, str(self.id) + '.' + self.config.ext)
+        if not os.path.exists(filepath):
+            with open(filepath, 'w') as f:
+                f.write(self.code)
+        cmd = os.environ.get('EDITOR', 'vi') + ' ' + filepath
+        subprocess.call(cmd, shell=True)
 
 
 class HelpView(urwid.Frame):
@@ -105,6 +121,7 @@ class HelpView(urwid.Frame):
                 'H'                         : help
                 'R'                         : retrieve quiz list from website
                 'f'                         : search quiz by id
+                'e'                         : open editor to edit code
         ''')
         pile = urwid.Pile([title, body])
         filler = urwid.Filler(pile)

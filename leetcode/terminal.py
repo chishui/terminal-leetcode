@@ -75,9 +75,11 @@ class Terminal(object):
             if not self.help_view:
                 self.make_helpview()
             self.goto_view(self.help_view)
+
         elif self.is_home and key is 'f':
             self.make_search_view()
             self.goto_view(self.search_view)
+
         else:
             return key
 
@@ -94,7 +96,8 @@ class Terminal(object):
         return self.search_view
 
     def make_detailview(self, title, body, code):
-        self.detail_view = DetailView(title=title, body=body, code=code)
+        quizid = self.home_view.listbox.get_focus()[0].data.id
+        self.detail_view = DetailView(title, body, code, quizid, self.leetcode.config)
         return self.detail_view
 
     def make_listview(self, data):
