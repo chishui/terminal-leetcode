@@ -4,7 +4,7 @@ Terminal-Leetcode
 Terminal-Leetcode is a terminal based leetcode website viewer.  
 This project is inspired by RTV.
 
-![alt text](screenshots/list.png "quiz list" )
+![alt text](screenshots/list.gif "quiz list" )
 <!--![alt text](screenshots/detail.png "quiz detail")-->
 ---------------
 
