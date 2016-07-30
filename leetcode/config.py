@@ -13,10 +13,13 @@ class Config(object):
         username
         password
         language
+        ext # code file extension
+        path # code path
     '''
     def __init__(self):
         self.parser = ConfigParser.SafeConfigParser({'username' : '', 'password' : '',
-                                                     'language' : 'C++'})
+                                                     'language' : 'C++', 'ext': '',
+                                                     'path' : ''})
         self.username = None
         self.password = None
         self.language = 'C++'

@@ -50,6 +50,7 @@ class Leetcode(object):
         return self.parse_home(text)
 
     def parse_home(self, text):
+        self.items = []
         bs = BeautifulSoup(text, 'html.parser')
         trs = bs.find_all('tr')
         for tr in trs:

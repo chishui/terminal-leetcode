@@ -8,7 +8,7 @@ requirements = ['urwid', 'requests', 'bs4']
 
 setup(
     name = "terminal-leetcode",
-    version = "0.0.4",
+    version = "0.0.6",
     author = "Liyun Xiu",
     author_email = "chishui2@gmail.com",
     description = "A terminal based leetcode website viewer",

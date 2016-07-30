@@ -2,6 +2,7 @@ import os
 import urwid
 import subprocess
 from .model import QuizItem
+from .code import enhance_code, generate_makefile
 
 def vim_key_map(key):
     if key == 'j':
@@ -38,11 +39,6 @@ class ItemWidget(urwid.WidgetWrap):
             (15, urwid.AttrWrap(urwid.Text('%s' % data.acceptance), lockbody, 'focus')),
             (15, urwid.AttrWrap(urwid.Text('%s' % data.difficulty), lockbody, 'focus')),
         ]
-        #text = str(id).ljust(15) + title[:80].ljust(80) +
-        #acceptance.ljust(15) + difficulty.ljust(15)
-        #self.item = [
-            #urwid.AttrWrap(urwid.Text(text), 'body', 'focus')
-        #]
         w = urwid.Columns(self.item)
         super(ItemWidget, self).__init__(w)
 
@@ -90,14 +86,27 @@ class DetailView(urwid.Frame):
             return urwid.Frame.keypress(self, size, key)
 
     def edit_code(self):
+        if self.config.path == '':
+            return
         if not os.path.exists(self.config.path):
             os.makedirs(self.config.path)
+
         filepath = os.path.join(self.config.path, str(self.id) + '.' + self.config.ext)
+        code = prepare_code(self.code, self.config.language, filepath)
         if not os.path.exists(filepath):
             with open(filepath, 'w') as f:
-                f.write(self.code)
+                f.write(code)
         cmd = os.environ.get('EDITOR', 'vi') + ' ' + filepath
+        current_directory = os.getcwd()
+        os.chdir(self.config.path)
         subprocess.call(cmd, shell=True)
+        os.chdir(current_directory)
+
+
+@enhance_code
+#@generate_makefile
+def prepare_code(code, language, filepath):
+    return code
 
 
 class HelpView(urwid.Frame):
