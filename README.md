@@ -77,12 +77,13 @@ to use Sublime Text as command line editor.
 - Press ``enter`` or ``right`` to see a quiz detail, and press ``left`` to go back.  
 - Press ``R`` in quiz list view to retrieve quiz from website.  
 - Press ``PageUp`` or ``PageDown`` to go to prev or next page.  
-- Press ``f`` to search quiz by id.
-- Press ``e`` to open editor to edit code.
-- Press ``1`` to sort quiz list by id.
-- Press ``2`` to sort quiz list by title.
-- Press ``3`` to sort quiz list by acceptance.
-- Press ``4`` to sort quiz list by difficulty.  
+- Press ``f`` in quiz list view to search quiz by id.
+- Press ``e`` in quiz detail view to open editor to edit code.
+- Press ``d`` in quiz detail view to open discussion page in web browser
+- Press ``1`` in quiz list view to sort quiz list by id.
+- Press ``2`` in quiz list view to sort quiz list by title.
+- Press ``3`` in quiz list view to sort quiz list by acceptance.
+- Press ``4`` in quiz list view to sort quiz list by difficulty.  
 Vim's moving keys ``h``, ``j``, ``k``, ``l``, ``ctrl+f``, ``ctrl+b`` are supported.
 
 

@@ -1,8 +1,12 @@
 import os
+import re
+import webbrowser
+import urlparse
 import urwid
 import subprocess
 from .model import QuizItem
 from .code import enhance_code, generate_makefile
+from .leetcode import BASE_URL
 
 def vim_key_map(key):
     if key == 'j':
@@ -50,38 +54,50 @@ class ItemWidget(urwid.WidgetWrap):
 
 
 class DetailView(urwid.Frame):
-    def __init__(self, title, body, code, id, config):
-        self.title = title
-        self.body = body
-        self.code = code
-        self.id = id
+    def __init__(self, data, config):
+        self.data = data
         self.config = config
         blank = urwid.Divider()
-        view_title = urwid.AttrWrap(urwid.Text(self.title), 'body')
-        view_text = urwid.Text(self.body)
+        view_title = urwid.AttrWrap(urwid.Text(self.data.title), 'body')
+        view_text = self.make_body_widgets()
         view_code_title = urwid.Text('\n --- Sample Code ---\n')
-        view_code = urwid.Text(self.code)
-        listitems = [
-            blank,
-            view_title,
-            blank,
-            view_text,
-            blank,
-            view_code_title,
-            blank,
-            view_code,
-            blank,
-        ]
+        view_code = urwid.Text(self.data.code)
+        listitems = [blank, view_title, blank] + view_text + \
+                    [blank, view_code_title, blank, view_code, blank]
         listbox = urwid.ListBox(urwid.SimpleListWalker(listitems))
         urwid.Frame.__init__(self, listbox)
+
+    def make_body_widgets(self):
+        newline = 0
+        tags = False
+        text_widgets = []
+        for line in self.data.body.split('\n'):
+            if line == '':
+                newline = newline + 1
+                if newline >= 2:
+                    tags = False
+            else:
+                newline = 0
+                if re.search('Show Tags', line):
+                    tags = True
+                elif tags:
+                    text_widgets.append(urwid.Text(('tag', line)))
+                    continue
+            text_widgets.append(urwid.Text(line))
+        return text_widgets
 
     def keypress(self, size, key):
         key = vim_key_map(key)
         ignore_key = ('l', 'right', 'enter')
         if key in ignore_key:
             pass
+        # edit sample code
         if key is 'e':
             self.edit_code()
+        # open discussion page from default browser
+        elif key is 'd':
+            url = self.get_discussion_url()
+            webbrowser.open(url)
         else:
             return urwid.Frame.keypress(self, size, key)
 
@@ -91,8 +107,8 @@ class DetailView(urwid.Frame):
         if not os.path.exists(self.config.path):
             os.makedirs(self.config.path)
 
-        filepath = os.path.join(self.config.path, str(self.id) + '.' + self.config.ext)
-        code = prepare_code(self.code, self.config.language, filepath)
+        filepath = os.path.join(self.config.path, str(self.data.id) + '.' + self.config.ext)
+        code = prepare_code(self.data.code, self.config.language, filepath)
         if not os.path.exists(filepath):
             with open(filepath, 'w') as f:
                 f.write(code)
@@ -102,17 +118,21 @@ class DetailView(urwid.Frame):
         subprocess.call(cmd, shell=True)
         os.chdir(current_directory)
 
+    def get_discussion_url(self):
+        item_url = self.data.url.strip('/')
+        name = item_url.split('/')[-1]
+        url = BASE_URL + '/discuss/questions/oj/' + name
+        return url
+
 
 @enhance_code
-#@generate_makefile
+@generate_makefile
 def prepare_code(code, language, filepath):
     return code
 
 
 class HelpView(urwid.Frame):
-    def __init__(self):
-        title = urwid.AttrWrap(urwid.Text('Help'), 'body')
-        body = urwid.Text('''
+    '''
         basic:
                 'UP' or 'k'                 : up
                 'DOWN' or 'j'               : down
@@ -131,7 +151,12 @@ class HelpView(urwid.Frame):
                 'R'                         : retrieve quiz list from website
                 'f'                         : search quiz by id
                 'e'                         : open editor to edit code
-        ''')
+                'd'                         : open discussion in web browser
+    '''
+
+    def __init__(self):
+        title = urwid.AttrWrap(urwid.Text('Help'), 'body')
+        body = urwid.Text(HelpView.__doc__)
         pile = urwid.Pile([title, body])
         filler = urwid.Filler(pile)
         urwid.Frame.__init__(self, filler)

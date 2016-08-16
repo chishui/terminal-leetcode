@@ -1,3 +1,4 @@
+from collections import namedtuple
 import urwid
 from .leetcode import Leetcode
 from .views import HomeView, DetailView, HelpView
@@ -6,8 +7,11 @@ palette = [
     ('body', 'dark cyan', ''),
     ('focus', 'white', ''),
     ('head', 'white', 'dark gray'),
-    ('lock', 'dark gray', '')
+    ('lock', 'dark gray', ''),
+    ('tag', 'white', 'light cyan', 'standout')
     ]
+
+DetailData = namedtuple('DetailData', ['title', 'body', 'code', 'id', 'url'])
 
 def is_string_an_integer(s):
     try:
@@ -73,11 +77,11 @@ class Terminal(object):
 
         elif self.is_home and (key is 'l' or key is 'enter' or key is 'right'):
             if  self.home_view.listbox.get_focus()[0].selectable():
-                if self.detail_view and self.detail_view.title == self.home_view.listbox.get_focus()[0].data.title:
-                    self.goto_view(self.detail_view)
-                else:
-                    title, body, code = self.leetcode.retrieve_detail(self.home_view.listbox.get_focus()[0].data)
-                    self.goto_view(self.make_detailview(title, body, code))
+                title, body, code = self.leetcode.retrieve_detail(self.home_view.listbox.get_focus()[0].data)
+                quizid = self.home_view.listbox.get_focus()[0].data.id
+                url = self.home_view.listbox.get_focus()[0].data.url
+                data = DetailData(title, body, code, quizid, url)
+                self.goto_view(self.make_detailview(data))
 
         elif not self.is_home and (key is 'left' or key is 'h'):
             self.go_back()
@@ -106,9 +110,8 @@ class Terminal(object):
                                                ('relative', 100), 'bottom', None)
         return self.search_view
 
-    def make_detailview(self, title, body, code):
-        quizid = self.home_view.listbox.get_focus()[0].data.id
-        self.detail_view = DetailView(title, body, code, quizid, self.leetcode.config)
+    def make_detailview(self, data):
+        self.detail_view = DetailView(data, self.leetcode.config)
         return self.detail_view
 
     def make_listview(self, data):
@@ -141,8 +144,3 @@ class Terminal(object):
         self.loop = urwid.MainLoop(self.home_view, palette, unhandled_input=self.keystroke)
         self.view_stack.append(self.home_view)
         self.loop.run()
-
-
-if __name__ == '__main__':
-    term = Terminal()
-    term.run()
