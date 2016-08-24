@@ -96,7 +96,7 @@ class DetailView(urwid.Frame):
             return urwid.Frame.keypress(self, size, key)
 
     def edit_code(self):
-        if self.config.path == '':
+        if not self.config.path:
             return
         if not os.path.exists(self.config.path):
             os.makedirs(self.config.path)
