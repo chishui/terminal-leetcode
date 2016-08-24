@@ -1,7 +1,10 @@
+import sys
+from threading import Thread
 from collections import namedtuple
 import urwid
 from .leetcode import Leetcode
-from .views import HomeView, DetailView, HelpView
+from .views import HomeView, DetailView, HelpView, LoadingView
+from .viewhelper import *
 
 palette = [
     ('body', 'dark cyan', ''),
@@ -30,6 +33,7 @@ class Terminal(object):
         self.view_stack = []
         self.detail_view = None
         self.search_view = None
+        self.loading_view = None
 
     @property
     def current_view(self):
@@ -77,11 +81,9 @@ class Terminal(object):
 
         elif self.is_home and (key is 'l' or key is 'enter' or key is 'right'):
             if  self.home_view.listbox.get_focus()[0].selectable():
-                title, body, code = self.leetcode.retrieve_detail(self.home_view.listbox.get_focus()[0].data)
-                quizid = self.home_view.listbox.get_focus()[0].data.id
-                url = self.home_view.listbox.get_focus()[0].data.url
-                data = DetailData(title, body, code, quizid, url)
-                self.goto_view(self.make_detailview(data))
+                self.show_loading('Loading Quiz', 17)
+                self.t = Thread(target=self.run_retrieve_detail, args=(self.home_view.listbox.get_focus()[0].data,))
+                self.t.start()
 
         elif not self.is_home and (key is 'left' or key is 'h'):
             self.go_back()
@@ -111,7 +113,7 @@ class Terminal(object):
         return self.search_view
 
     def make_detailview(self, data):
-        self.detail_view = DetailView(data, self.leetcode.config)
+        self.detail_view = DetailView(data, self.leetcode.config, self.loop)
         return self.detail_view
 
     def make_listview(self, data):
@@ -137,10 +139,55 @@ class Terminal(object):
         self.help_view = HelpView()
         return self.help_view
 
-    def run(self):
-        self.leetcode.login()
-        data = self.leetcode.hard_retrieve_home()
+    def show_loading(self, text, width):
+        self.loading_view = LoadingView(text, width, self.loop)
+        self.loop.widget = self.loading_view
+        self.loading_view.start()
+
+    def end_loading(self):
+        if self.loading_view:
+            self.loading_view.end()
+            self.loading_view = None
+
+    def retrieve_home_done(self, data):
         self.home_view = self.make_listview(data)
-        self.loop = urwid.MainLoop(self.home_view, palette, unhandled_input=self.keystroke)
-        self.view_stack.append(self.home_view)
-        self.loop.run()
+        self.goto_view(self.home_view)
+        self.end_loading()
+        delay_refresh(self.loop)
+
+    def retrieve_detail_done(self, title, body, code):
+        quizid = self.home_view.listbox.get_focus()[0].data.id
+        url = self.home_view.listbox.get_focus()[0].data.url
+        data = DetailData(title, body, code, quizid, url)
+        self.goto_view(self.make_detailview(data))
+        self.end_loading()
+        delay_refresh(self.loop)
+
+    def run_retrieve_home(self):
+        self.leetcode.login()
+        if self.loading_view:
+            self.loading_view.set_text('Loading')
+        data = self.leetcode.hard_retrieve_home()
+        self.retrieve_home_done(data)
+
+    def run_retrieve_detail(self, data):
+        title, body, code = self.leetcode.retrieve_detail(data)
+        self.retrieve_detail_done(title, body, code)
+
+    def run(self):
+        self.loop = urwid.MainLoop(None, palette, unhandled_input=self.keystroke)
+        self.show_loading('Log In', 12)
+        self.t = Thread(target=self.run_retrieve_home)
+        self.t.start()
+        try:
+            self.loop.run()
+        except KeyboardInterrupt:
+            self.clear_thread()
+            sys.exit()
+
+    def clear_thread(self):
+        if self.loading_view:
+            self.loading_view.end()
+        if self.t and self.t.is_alive():
+            t.join()
+

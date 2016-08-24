@@ -35,3 +35,10 @@ def generate_makefile(func):
             f.write(text)
         return func(code, language, filepath)
     return wrapper
+
+def is_inside_tmux():
+    return 'TMUX' in os.environ
+
+def open_in_new_tmux_window(edit_cmd):
+    cmd = "tmux split-window -h '%s'" % edit_cmd
+    os.system(cmd)

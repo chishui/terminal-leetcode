@@ -1,29 +1,19 @@
 import os
 import re
-import webbrowser
-import urlparse
-import urwid
+import time
 import subprocess
-from .model import QuizItem
-from .code import enhance_code, generate_makefile
+import webbrowser
+from threading import Thread, Lock
+import urwid
+from .model import QuizItem, EasyLock
 from .leetcode import BASE_URL
-
-def vim_key_map(key):
-    if key == 'j':
-        return 'down'
-    if key == 'k':
-        return 'up'
-    if key == 'h':
-        return 'left'
-    if key == 'l':
-        return 'right'
-    if key == 'ctrl f':
-        return 'page down'
-    if key == 'ctrl b':
-        return 'page up'
-    return key
+from .code import *
+from .viewhelper import *
 
 class ItemWidget(urwid.WidgetWrap):
+    '''
+        Quiz List Item View
+    '''
     def __init__(self, data, sel=True):
         self.sel = sel
         self.id = data.id
@@ -44,7 +34,7 @@ class ItemWidget(urwid.WidgetWrap):
             (15, urwid.AttrWrap(urwid.Text('%s' % data.difficulty), lockbody, 'focus')),
         ]
         w = urwid.Columns(self.item)
-        super(ItemWidget, self).__init__(w)
+        urwid.WidgetWrap.__init__(self, w)
 
     def selectable(self):
         return self.sel and not self.data.lock
@@ -54,9 +44,13 @@ class ItemWidget(urwid.WidgetWrap):
 
 
 class DetailView(urwid.Frame):
-    def __init__(self, data, config):
+    '''
+        Quiz Item Detail View
+    '''
+    def __init__(self, data, config, loop = None):
         self.data = data
         self.config = config
+        self.loop = loop
         blank = urwid.Divider()
         view_title = urwid.AttrWrap(urwid.Text(self.data.title), 'body')
         view_text = self.make_body_widgets()
@@ -64,8 +58,8 @@ class DetailView(urwid.Frame):
         view_code = urwid.Text(self.data.code)
         listitems = [blank, view_title, blank] + view_text + \
                     [blank, view_code_title, blank, view_code, blank]
-        listbox = urwid.ListBox(urwid.SimpleListWalker(listitems))
-        urwid.Frame.__init__(self, listbox)
+        self.listbox = urwid.ListBox(urwid.SimpleListWalker(listitems))
+        urwid.Frame.__init__(self, self.listbox)
 
     def make_body_widgets(self):
         newline = 0
@@ -114,8 +108,12 @@ class DetailView(urwid.Frame):
                 f.write(code)
         cmd = os.environ.get('EDITOR', 'vi') + ' ' + filepath
         current_directory = os.getcwd()
-        os.chdir(self.config.path)
-        subprocess.call(cmd, shell=True)
+        if is_inside_tmux():
+            open_in_new_tmux_window(cmd)
+        else:
+            os.chdir(self.config.path)
+            subprocess.call(cmd, shell=True)
+            delay_refresh_detail(self.loop)
         os.chdir(current_directory)
 
     def get_discussion_url(self):
@@ -170,6 +168,9 @@ class HelpView(urwid.Frame):
 
 
 class HomeView(urwid.Frame):
+    '''
+        Quiz List View
+    '''
     def __init__(self, data, header):
         title = [
             ('fixed', 15, urwid.Padding(urwid.AttrWrap(
@@ -218,6 +219,53 @@ class HomeView(urwid.Frame):
             self.sort_list('difficulty', cmp=self.difficulty_cmp)
         else:
             return urwid.Frame.keypress(self, size, key)
+
+
+class LoadingView(urwid.Frame):
+    '''
+        Loading View When Doing HTTP Request
+    '''
+    def __init__(self, text, width, loop = None):
+        self.running = False
+        self.lock = EasyLock()
+        self.loop = loop
+        self.overlay = urwid.Overlay(
+                    urwid.LineBox(urwid.Text(text)), urwid.SolidFill(),
+                    'center', width, 'middle', None)
+        urwid.Frame.__init__(self, self.overlay)
+
+    def keypress(self, size, key):
+        pass
+
+    def set_text(self, text):
+        with self.lock:
+            self.overlay.contents[1][0].base_widget.set_text(text)
+
+    @property
+    def is_running(self):
+        return self.t and self.t.is_alive()
+
+    def start(self):
+        self.running = True
+        self.t = Thread(target=self.work)
+        self.t.start()
+
+    def end(self):
+        self.running = False
+        self.t.join()
+
+    def work(self):
+        while self.running:
+            with self.lock:
+                text = self.overlay.contents[1][0].base_widget.text
+                num = text.count('.')
+                if num < 3:
+                    text = text + '.'
+                else:
+                    text = text.strip('.')
+                self.overlay.contents[1][0].base_widget.set_text(text)
+            delay_refresh(self.loop)
+            time.sleep(0.8)
 
 
 def make_itemwidgets(data):
