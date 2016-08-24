@@ -10,7 +10,6 @@ HOME_URL = BASE_URL + '/problemset/algorithms'
 LOGIN_URL = BASE_URL + '/accounts/login/'
 HOME = os.path.expanduser('~')
 CONFIG = os.path.join(HOME, '.config', 'leetcode')
-DATA_FILE = os.path.join(CONFIG, 'leetcode_home.txt')
 
 headers = {
     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
@@ -40,13 +39,6 @@ class Leetcode(object):
 
     def hard_retrieve_home(self):
         text = self.retrieve(HOME_URL).encode('utf-8')
-        save_data_to_file(text, DATA_FILE)
-        return self.parse_home(text)
-
-    def retrieve_home(self):
-        if not os.path.exists(DATA_FILE):
-            return self.hard_retrieve_home()
-        text = load_data_from_file(DATA_FILE)
         return self.parse_home(text)
 
     def parse_home(self, text):
@@ -114,14 +106,3 @@ def format_language_text(language):
     language = language.replace('+', '\+')
     language = language.replace('#', '\#')
     return language
-
-def save_data_to_file(data, filename):
-    filepath = os.path.dirname(filename)
-    if not os.path.exists(filepath):
-        os.makedirs(filepath)
-    with open(filename, 'w') as f:
-        f.write(data)
-
-def load_data_from_file(path):
-    with open(path, 'r') as f:
-        return f.read()
