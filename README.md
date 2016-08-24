@@ -2,7 +2,7 @@
 Terminal-Leetcode
 ============================
 Terminal-Leetcode is a terminal based leetcode website viewer.  
-This project is inspired by RTV.
+This project is inspired by [RTV](https://github.com/michael-lazar/rtv).
 
 ![alt text](screenshots/list.gif "quiz list" )
 <!--![alt text](screenshots/detail.png "quiz detail")-->
@@ -29,7 +29,7 @@ Clone the repository
  $ sudo python setup.py install  
 ```
 # Usage
-To run the program, input leetcode in terminal    
+To run the program, input ``leetcode`` in terminal    
 ```
  $ leetcode
 ```
@@ -42,19 +42,18 @@ username=chishui
 password=123456
 ```
 Then restart this program.
-### Program Language
-You can set your program language in config.cfg as:
+### Programming Language
+You can set your programming language in config.cfg as:
 ```
 [leetcode]
 ........
 language=Java
 ```
 to see default sample code in quiz detail view in your favorate language.  
-Please make sure to use Leetcode support program languages and use the string exactly 
+Please make sure to use Leetcode supported programming languages and use the string exactly 
 the same as it appears in Leetcode.    
-Default language is C++.
 ### Writing Code
-Terminal-Leetcode allows you to open editor to edit quiz default code you are viewing.  
+Terminal-Leetcode allows you to open editor to edit default code you are viewing.  
 You can set your code editing settings in config.cfg as:
 ```
 [leetcode]
@@ -68,7 +67,50 @@ with quiz id and file extention you set.
 Default editor is vim, you can set ``export EDITOR=***`` to change editor. You can refer to
 [this article](http://sweetme.at/2013/09/03/how-to-open-a-file-in-sublime-text-2-or-3-from-the-command-line-on-mac-osx/)
 to use Sublime Text as command line editor.
+#### Tmux Support
+If you're using Terminal-Leetcode inside of a tmux session, when you press ``e``, current tmux window will be
+splitted vertically and an editor is opened inside the new created tmux pane.
+#### Code Snippet
+Two code snippets can be used when creating code file.  
+You can create files ``before`` and ``after`` in ``~/.config/leetcode/snippet``. Code snippet in ``before``
+will be placed at the beginning of the code file. Code snippet in file ``after`` will be placed at the end of
+the code file.  
+Like in C++, write
+```
+#include <iostream>
+#include <vector>
 
+using namespace std;
+```
+in file ``before`` and
+```
+int main() {
+    Solution s;
+}
+```
+in file ``after``, then you can view code of quiz (take quiz 123 for example) as:
+```
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+class Solution {
+public:
+    int maxProfit(vector<int>& prices) {
+        
+    }
+};
+
+int main() {
+    Solution s;
+}
+```
+It becomes much easier to write your solution code and then test your solution.  
+#### C++ Specific
+- If you don't set language in config.cfg, default language is C++.  
+- If you set C++ as your programming language, when you open editor, a Makefile is created automatically, so
+after you finish the code, you can use ``make`` directly to compile your code. 
 
 
 # Controls:
