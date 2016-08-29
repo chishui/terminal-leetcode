@@ -4,18 +4,18 @@ from setuptools import setup
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
-requirements = ['urwid', 'requests', 'bs4']
+requirements = ['urwid', 'requests', 'bs4', 'lxml']
 
 setup(
     name = "terminal-leetcode",
-    version = "0.0.6",
+    version = "0.0.7",
     author = "Liyun Xiu",
     author_email = "chishui2@gmail.com",
     description = "A terminal based leetcode website viewer",
     license = "MIT",
     keywords = "leetcode terminal urwid",
     url = "https://github.com/chishui/terminal-leetcode",
-    packages=['leetcode'],
+    packages=['leetcode', 'leetcode/views'],
     long_description=read('README.md'),
     include_package_data=True,
     install_requires=requirements,

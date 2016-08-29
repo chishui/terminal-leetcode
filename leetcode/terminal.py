@@ -3,8 +3,11 @@ from threading import Thread
 from collections import namedtuple
 import urwid
 from .leetcode import Leetcode
-from .views import HomeView, DetailView, HelpView, LoadingView
-from .viewhelper import *
+from views.home import HomeView
+from views.detail import DetailView
+from views.help import HelpView
+from views.loading import LoadingView
+from views.viewhelper import *
 
 palette = [
     ('body', 'dark cyan', ''),
@@ -73,18 +76,6 @@ class Terminal(object):
         elif key in ('q', 'Q'):
             self.goto_view(self.make_quit_confirmation())
 
-        elif key is 'R':
-            items = self.leetcode.hard_retrieve_home()
-            self.home_view = self.make_listview(items)
-            self.view_stack = []
-            self.goto_view(self.home_view)
-
-        elif self.is_home and (key is 'l' or key is 'enter' or key is 'right'):
-            if  self.home_view.listbox.get_focus()[0].selectable():
-                self.show_loading('Loading Quiz', 17)
-                self.t = Thread(target=self.run_retrieve_detail, args=(self.home_view.listbox.get_focus()[0].data,))
-                self.t.start()
-
         elif not self.is_home and (key is 'left' or key is 'h'):
             self.go_back()
 
@@ -93,12 +84,25 @@ class Terminal(object):
                 self.make_helpview()
             self.goto_view(self.help_view)
 
-        elif self.is_home and key is 'f':
-            self.make_search_view()
-            self.goto_view(self.search_view)
-
         else:
             return key
+
+    def enter_search(self):
+        self.make_search_view()
+        self.goto_view(self.search_view)
+
+    def enter_detail(self, data):
+        self.show_loading('Loading Quiz', 17)
+        self.t = Thread(target=self.run_retrieve_detail, args=(data,))
+        self.t.start()
+
+    def reload_list(self):
+        '''Press R in home view to retrieve quiz list'''
+        items = self.leetcode.hard_retrieve_home()
+        if items:
+            self.home_view = self.make_listview(items)
+            self.view_stack = []
+            self.goto_view(self.home_view)
 
     def make_quit_confirmation(self):
         text = urwid.AttrMap(urwid.Text('Do you really want to quit ? (y/n)'), 'body')
@@ -118,7 +122,7 @@ class Terminal(object):
 
     def make_listview(self, data):
         header = self.make_header()
-        self.home_view = HomeView(data, header)
+        self.home_view = HomeView(data, header, self)
         return self.home_view
 
     def make_header(self):
@@ -151,6 +155,7 @@ class Terminal(object):
 
     def retrieve_home_done(self, data):
         self.home_view = self.make_listview(data)
+        self.view_stack = []
         self.goto_view(self.home_view)
         self.end_loading()
         delay_refresh(self.loop)
@@ -164,15 +169,19 @@ class Terminal(object):
         delay_refresh(self.loop)
 
     def run_retrieve_home(self):
-        self.leetcode.login()
-        if self.loading_view:
-            self.loading_view.set_text('Loading')
-        data = self.leetcode.hard_retrieve_home()
-        self.retrieve_home_done(data)
+        success = self.leetcode.login()
+        if success:
+            if self.loading_view:
+                self.loading_view.set_text('Loading')
+            data = self.leetcode.hard_retrieve_home()
+            if data:
+                self.retrieve_home_done(data)
 
     def run_retrieve_detail(self, data):
-        title, body, code = self.leetcode.retrieve_detail(data)
-        self.retrieve_detail_done(title, body, code)
+        ret = self.leetcode.retrieve_detail(data)
+        if ret:
+            title, body, code = ret
+            self.retrieve_detail_done(title, body, code)
 
     def run(self):
         self.loop = urwid.MainLoop(None, palette, unhandled_input=self.keystroke)
