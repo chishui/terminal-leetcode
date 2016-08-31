@@ -20,7 +20,8 @@ class HelpView(urwid.Frame):
                 'q'                         : quit
                 'H'                         : help
                 'R'                         : retrieve quiz list from website
-                'f'                         : search quiz by id
+                'f'                         : search quiz
+                'n'                         : search next quiz
                 'e'                         : open editor to edit code
                 'd'                         : open discussion in web browser
     '''

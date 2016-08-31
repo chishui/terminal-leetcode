@@ -30,13 +30,13 @@ class DetailView(urwid.Frame):
         tags = False
         text_widgets = []
         for line in self.data.body.split('\n'):
-            if line == '':
+            if line == '' and tags:
                 newline = newline + 1
                 if newline >= 2:
                     tags = False
             else:
-                newline = 0
                 if re.search('Show Tags', line):
+                    newline = 0
                     tags = True
                 elif tags:
                     text_widgets.append(urwid.Text(('tag', line)))

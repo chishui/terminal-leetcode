@@ -19,12 +19,6 @@ palette = [
 
 DetailData = namedtuple('DetailData', ['title', 'body', 'code', 'id', 'url'])
 
-def is_string_an_integer(s):
-    try:
-        int(s)
-        return True
-    except ValueError:
-        return False
 
 class Terminal(object):
     def __init__(self):
@@ -64,11 +58,7 @@ class Terminal(object):
         elif self.current_view == self.search_view:
             if key is 'enter':
                 text = self.search_view.contents[1][0].original_widget.get_edit_text()
-                if text != '' and is_string_an_integer(text):
-                    for i, item in enumerate(self.home_view.listbox.body):
-                        if item.data.id == int(text):
-                            self.home_view.listbox.focus_position = i
-                            break
+                self.home_view.handle_search(text)
                 self.go_back()
             elif key is 'esc':
                 self.go_back()

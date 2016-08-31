@@ -67,6 +67,7 @@ class Leetcode(object):
 
         return self.items
 
+
     def retrieve_detail(self, item):
         r, error = retrieve(self.session, BASE_URL + item.url)
         if error:
@@ -74,8 +75,11 @@ class Leetcode(object):
         text = r.text.encode('utf-8')
         text = text.replace('<br>', '')
         bs = BeautifulSoup(text, 'lxml')
+        content = bs.find('div', 'question-content')
+        preprocess_bs(content)
         title = bs.find('div', 'question-title').h3.text
-        body = bs.find('div', 'question-content').text.replace(chr(13), '')
+        body = content.text.replace(chr(13), '')
+        body = re.sub('\n{3,}', '\n\n', body)
         # get sample code
         rawCode = bs.find("div", attrs={"ng-controller": "AceCtrl as aceCtrl"}).attrs["ng-init"]
         language = format_language_text(self.config.language)
@@ -106,6 +110,16 @@ class Leetcode(object):
         self.cookies = dict(self.session.cookies)
         self.is_login = True
         return True
+
+def preprocess_bs(bs):
+    allbs = bs.find_all('b')
+    for b in allbs:
+        if b.text == 'Credits:':
+            b.parent.extract()
+    allas = bs.find_all('a')
+    for a in allas:
+        if a.text == 'Subscribe':
+            a.parent.parent.extract()
 
 def retrieve(session, url, headers=None, method='GET', data=None):
     try:

@@ -1,3 +1,4 @@
+import re
 import urwid
 from .viewhelper import vim_key_map
 
@@ -54,6 +55,7 @@ class HomeView(urwid.Frame):
         header_pile = urwid.Pile([header, title_column])
         urwid.Frame.__init__(self, urwid.AttrWrap(self.listbox, 'body'), header=header_pile)
         self.last_sort = {'attr': 'id', 'reverse': True}
+        self.last_search_text = None
 
     def sort_list(self, attr, cmp=None):
         if attr == self.last_sort['attr']:
@@ -98,12 +100,38 @@ class HomeView(urwid.Frame):
             self.listbox.focus_position = 0
         elif key is 'end':
             self.listbox.focus_position = len(self.listbox.body) - 1
+        elif key is 'n':
+            self.handle_search(self.last_search_text, True)
         else:
             return urwid.Frame.keypress(self, size, key)
 
+    def handle_search(self, text, from_current=False):
+        self.last_search_text = text
+        if text == '':
+            return
+        cur = self.listbox.focus_position if from_current else 0
+        if is_string_an_integer(text):
+            for i in range(cur + 1, len(self.listbox.body)):
+                item = self.listbox.body[i]
+                if item.data.id == int(text):
+                    self.listbox.focus_position = i
+                    break
+        else:
+            for i in range(cur + 1, len(self.listbox.body)):
+                item = self.listbox.body[i]
+                if re.search('.*(%s).*' % text, item.data.title, re.I):
+                    self.listbox.focus_position = i
+                    break
 
 def make_itemwidgets(data):
     items = []
     for item in data:
         items.append(ItemWidget(item))
     return items
+
+def is_string_an_integer(s):
+    try:
+        int(s)
+        return True
+    except ValueError:
+        return False

@@ -120,7 +120,8 @@ after you finish the code, you can use ``make`` directly to compile your code.
 - Press ``R`` in quiz list view to retrieve quiz from website.  
 - Press ``PageUp`` or ``PageDown`` to go to prev or next page.  
 - Press ``Home`` or ``End`` to go to the first or last quiz.
-- Press ``f`` in quiz list view to search quiz by id.
+- Press ``f`` in quiz list view to search quiz by id or title.
+- Press ``n`` in quiz list view to search next quiz with search text input before.
 - Press ``e`` in quiz detail view to open editor to edit code.
 - Press ``d`` in quiz detail view to open discussion page in web browser
 - Press ``1`` in quiz list view to sort quiz list by id.
