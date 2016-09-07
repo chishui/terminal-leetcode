@@ -1,5 +1,6 @@
 import os
 import re
+import json
 import requests
 import logging
 from bs4 import BeautifulSoup
@@ -7,11 +8,13 @@ from .config import Config
 from .model import QuizItem
 
 BASE_URL = 'https://leetcode.com'
+API_URL = BASE_URL + '/api/problems/algorithms/'
 HOME_URL = BASE_URL + '/problemset/algorithms'
 LOGIN_URL = BASE_URL + '/accounts/login/'
 HOME = os.path.expanduser('~')
 CONFIG = os.path.join(HOME, '.config', 'leetcode')
 #logging.basicConfig(filename=os.path.join(CONFIG,'running.log'),format='%(asctime)s %(message)s',level=logging.DEBUG)
+DATA_FILE = os.path.join(CONFIG, 'leetcode_home.txt')
 
 headers = {
     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
@@ -40,11 +43,39 @@ class Leetcode(object):
         return [i for i in self.items if i.pass_status == 'ac']
 
     def hard_retrieve_home(self):
-        r, error = retrieve(self.session, HOME_URL)
+        r, error = retrieve(self.session, API_URL)
         if error:
             return
         text = r.text.encode('utf-8')
-        return self.parse_home(text)
+        #save_data_to_file(text, DATA_FILE)
+        return self.parse_home_API(text)
+
+    def retrieve_home(self):
+        if not os.path.exists(DATA_FILE):
+            return self.hard_retrieve_home()
+        text = load_data_from_file(DATA_FILE)
+        return self.parse_home_API(text)
+
+    def parse_home_API(self, text):
+        difficulty = {1: "Easy", 2: "Medium", 3: "Hard"}
+        self.items = []
+        data = json.loads(text)
+        for quiz in data['stat_status_pairs']:
+            if quiz['stat']['question__hide']:
+                continue
+
+            data = {}
+            data['title'] = quiz['stat']['question__title']
+            data['id'] = quiz['stat']['question_id']
+            data['lock'] = quiz['paid_only']
+            data['difficulty'] = difficulty[quiz['difficulty']['level']]
+            data['favorite'] = quiz['is_favor']
+            data['acceptance'] = "%.1f%%" % (float(quiz['stat']['total_acs']) * 100 / float(quiz['stat']['total_submitted']))
+            data['url'] = "/problems/" + quiz['stat']['question__title_slug']
+            data['pass'] = quiz['status']
+            item = QuizItem(data)
+            self.items.append(item)
+        return self.items
 
     def parse_home(self, text):
         self.items = []
@@ -66,7 +97,6 @@ class Leetcode(object):
             self.items.append(item)
 
         return self.items
-
 
     def retrieve_detail(self, item):
         r, error = retrieve(self.session, BASE_URL + item.url)
@@ -102,7 +132,7 @@ class Leetcode(object):
         login_data['csrfmiddlewaretoken'] = csrftoken
         login_data['login'] = self.config.username
         login_data['password'] = self.config.password
-        login_data['remember'] = "on"
+        login_data['remember'] = "off"
         res, error = retrieve(self.session, LOGIN_URL, headers=headers, method='POST', data=login_data)
         if error:
             return False
@@ -138,3 +168,14 @@ def format_language_text(language):
     language = language.replace('+', '\+')
     language = language.replace('#', '\#')
     return language
+
+def save_data_to_file(data, filename):
+    filepath = os.path.dirname(filename)
+    if not os.path.exists(filepath):
+        os.makedirs(filepath)
+    with open(filename, 'w') as f:
+        f.write(data)
+
+def load_data_from_file(path):
+    with open(path, 'r') as f:
+        return f.read()

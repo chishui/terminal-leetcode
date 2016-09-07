@@ -1,12 +1,15 @@
+import os
 import re
+import json
 import urwid
 from .viewhelper import vim_key_map
+from ..config import MARK_FILE
 
 class ItemWidget(urwid.WidgetWrap):
     '''
         Quiz List Item View
     '''
-    def __init__(self, data, sel=True):
+    def __init__(self, data, sel=True, mark=False, mark_symbol=u'\u2022'):
         self.sel = sel
         self.id = data.id
         self.data = data
@@ -16,6 +19,8 @@ class ItemWidget(urwid.WidgetWrap):
             pass_symbol = u'\u2714'
         elif data.pass_status == 'notac':
             pass_symbol = u'\u2718'
+        if mark:
+            pass_symbol += mark_symbol
         text = str(data.id).ljust(4) + pass_symbol
         self.item = [
             ('fixed', 15, urwid.Padding(urwid.AttrWrap(
@@ -50,12 +55,14 @@ class HomeView(urwid.Frame):
             (15, urwid.AttrWrap(urwid.Text('Difficulty'), 'body', 'focus')),
         ]
         title_column = urwid.Columns(title)
-        items = make_itemwidgets(data)
+        self.marks = load_marks()
+        items = make_itemwidgets(data, self.marks)
         self.listbox = urwid.ListBox(urwid.SimpleListWalker(items))
         header_pile = urwid.Pile([header, title_column])
         urwid.Frame.__init__(self, urwid.AttrWrap(self.listbox, 'body'), header=header_pile)
         self.last_sort = {'attr': 'id', 'reverse': True}
         self.last_search_text = None
+        self.mark_symbol = get_mark_symbol(self.marks)
 
     def sort_list(self, attr, cmp=None):
         if attr == self.last_sort['attr']:
@@ -102,6 +109,14 @@ class HomeView(urwid.Frame):
             self.listbox.focus_position = len(self.listbox.body) - 1
         elif key is 'n':
             self.handle_search(self.last_search_text, True)
+        elif key is 't':
+            quiz_id = str(self.listbox.get_focus()[0].id)
+            add_mark(self.marks, quiz_id)
+            text = self.listbox.get_focus()[0].item[0][2].base_widget.text
+            if self.marks[quiz_id]['t']:
+                self.listbox.get_focus()[0].item[0][2].base_widget.set_text(text + self.mark_symbol)
+            else:
+                self.listbox.get_focus()[0].item[0][2].base_widget.set_text(text[0:-1])
         else:
             return urwid.Frame.keypress(self, size, key)
 
@@ -111,7 +126,7 @@ class HomeView(urwid.Frame):
             return
         cur = self.listbox.focus_position if from_current else 0
         if is_string_an_integer(text):
-            for i in range(cur + 1, len(self.listbox.body)):
+            for i in range(len(self.listbox.body)):
                 item = self.listbox.body[i]
                 if item.data.id == int(text):
                     self.listbox.focus_position = i
@@ -123,10 +138,15 @@ class HomeView(urwid.Frame):
                     self.listbox.focus_position = i
                     break
 
-def make_itemwidgets(data):
+def make_itemwidgets(data, marks):
     items = []
+    mark_symbol = get_mark_symbol(marks)
     for item in data:
-        items.append(ItemWidget(item))
+        quiz_id = str(item.id)
+        mark = False
+        if quiz_id in marks and 't' in marks[quiz_id]:
+            mark = marks[quiz_id]['t']
+        items.append(ItemWidget(item, mark=mark, mark_symbol=mark_symbol))
     return items
 
 def is_string_an_integer(s):
@@ -135,3 +155,23 @@ def is_string_an_integer(s):
         return True
     except ValueError:
         return False
+
+def load_marks():
+    if not os.path.exists(MARK_FILE):
+        return {}
+    with open(MARK_FILE, 'r') as f:
+        return json.load(f)
+
+def save_marks(data):
+    with open(MARK_FILE, 'w') as f:
+        json.dump(data, f)
+
+def add_mark(data, quiz_id):
+    if quiz_id in data and 't' in data[quiz_id]:
+        data[quiz_id]['t'] = not data[quiz_id]['t']
+    else:
+        data[quiz_id] = {'t': True}
+    save_marks(data)
+
+def get_mark_symbol(marks):
+    return u'\u2022' if 'symbol' not in marks else marks['symbol']

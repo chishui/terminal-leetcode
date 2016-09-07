@@ -4,6 +4,7 @@ import ConfigParser
 HOME = os.path.expanduser('~')
 CONFIG_FOLDER = os.path.join(HOME, '.config', 'leetcode')
 CONFIG_FILE = os.path.join(CONFIG_FOLDER, 'config.cfg')
+MARK_FILE = os.path.join(CONFIG_FOLDER, 'mark.json')
 
 class Config(object):
     '''

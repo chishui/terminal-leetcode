@@ -24,6 +24,7 @@ class HelpView(urwid.Frame):
                 'n'                         : search next quiz
                 'e'                         : open editor to edit code
                 'd'                         : open discussion in web browser
+                't'                         : add tag to quiz
     '''
 
     def __init__(self):
