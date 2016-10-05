@@ -59,15 +59,15 @@ class Leetcode(object):
     def parse_home_API(self, text):
         difficulty = {1: "Easy", 2: "Medium", 3: "Hard"}
         self.items = []
-        data = json.loads(text)
-        for quiz in data['stat_status_pairs']:
+        json_data = json.loads(text)
+        for quiz in json_data['stat_status_pairs']:
             if quiz['stat']['question__hide']:
                 continue
 
             data = {}
             data['title'] = quiz['stat']['question__title']
             data['id'] = quiz['stat']['question_id']
-            data['lock'] = quiz['paid_only']
+            data['lock'] = not json_data['is_paid'] and quiz['paid_only']
             data['difficulty'] = difficulty[quiz['difficulty']['level']]
             data['favorite'] = quiz['is_favor']
             data['acceptance'] = "%.1f%%" % (float(quiz['stat']['total_acs']) * 100 / float(quiz['stat']['total_submitted']))
