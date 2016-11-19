@@ -105,11 +105,19 @@ class Leetcode(object):
         text = r.text.encode('utf-8')
         text = text.replace('<br>', '')
         bs = BeautifulSoup(text, 'lxml')
+        #logging.info(bs)
+
+        if bs.find('form', 'form-signin'):
+            self.session.cookies.clear()
+            r, error = retrieve(requests, BASE_URL + item.url)
+            if error:
+                return
+
         content = bs.find('div', 'question-content')
         preprocess_bs(content)
-        title = bs.find('div', 'question-title').h3.text
+        title = bs.find('div', 'question-title').h3.text.strip()
         body = content.text.replace(chr(13), '')
-        body = re.sub('\n{3,}', '\n\n', body)
+        body = re.sub('\n{3,}', '\n\n', body).strip()
         # get sample code
         rawCode = bs.find("div", attrs={"ng-controller": "AceCtrl as aceCtrl"}).attrs["ng-init"]
         language = format_language_text(self.config.language)
@@ -142,6 +150,8 @@ class Leetcode(object):
         return True
 
 def preprocess_bs(bs):
+    if not bs:
+        return
     allbs = bs.find_all('b')
     for b in allbs:
         if b.text == 'Credits:':
