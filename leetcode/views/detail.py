@@ -52,6 +52,9 @@ class DetailView(urwid.Frame):
         # edit sample code
         if key is 'e':
             self.edit_code()
+        # edit new sample code
+        elif key is 'n':
+            self.edit_code(True)
         # open discussion page from default browser
         elif key is 'd':
             url = self.get_discussion_url()
@@ -59,23 +62,30 @@ class DetailView(urwid.Frame):
         else:
             return urwid.Frame.keypress(self, size, key)
 
-    def edit_code(self):
+    def edit_code(self, newcode=False):
         if not self.config.path:
             return
         if not os.path.exists(self.config.path):
             os.makedirs(self.config.path)
 
         filepath = os.path.join(self.config.path, str(self.data.id) + '.' + self.config.ext)
+        if newcode:
+            index = 1
+            while os.path.exists(filepath):
+                filepath =  os.path.join(self.config.path, str(self.data.id)\
+                            + '-' + str(index) + '.' + self.config.ext)
+                index = index + 1
+
         code = prepare_code(self.data.code, self.config.language, filepath)
         if not os.path.exists(filepath):
             with open(filepath, 'w') as f:
                 f.write(code)
         cmd = os.environ.get('EDITOR', 'vi') + ' ' + filepath
         current_directory = os.getcwd()
+        os.chdir(self.config.path)
         if is_inside_tmux():
             open_in_new_tmux_window(cmd)
         else:
-            os.chdir(self.config.path)
             subprocess.call(cmd, shell=True)
             delay_refresh_detail(self.loop)
         os.chdir(current_directory)

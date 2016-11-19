@@ -21,8 +21,9 @@ class HelpView(urwid.Frame):
                 'H'                         : help
                 'R'                         : retrieve quiz list from website
                 'f'                         : search quiz
-                'n'                         : search next quiz
+                'n'                         : search next quiz (quiz list view)
                 'e'                         : open editor to edit code
+                'n'                         : create a new file to edit sample code (quiz detail view)
                 'd'                         : open discussion in web browser
                 't'                         : add tag to quiz
     '''
