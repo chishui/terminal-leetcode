@@ -8,6 +8,7 @@ from views.detail import DetailView
 from views.help import HelpView
 from views.loading import LoadingView
 from views.viewhelper import *
+from .config import config
 
 palette = [
     ('body', 'dark cyan', ''),
@@ -107,7 +108,7 @@ class Terminal(object):
         return self.search_view
 
     def make_detailview(self, data):
-        self.detail_view = DetailView(data, self.leetcode.config, self.loop)
+        self.detail_view = DetailView(data, self.loop)
         return self.detail_view
 
     def make_listview(self, data):
@@ -119,8 +120,8 @@ class Terminal(object):
         if self.leetcode.is_login:
             columns = [
                 ('fixed', 15, urwid.Padding(urwid.AttrWrap(
-                    urwid.Text('%s' % self.leetcode.config.username),
-                    'head', ''), left=2)),
+                    urwid.Text('%s' % config.username),
+                    'head', ''))),
                 urwid.AttrWrap(urwid.Text('You have solved %d / %d problems. ' %
                     (len(self.leetcode.solved), len(self.leetcode.items))), 'head', ''),
             ]

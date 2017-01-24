@@ -4,12 +4,13 @@ import json
 import urwid
 from .viewhelper import vim_key_map
 from ..config import MARK_FILE
+import logging
 
 class ItemWidget(urwid.WidgetWrap):
     '''
         Quiz List Item View
     '''
-    def __init__(self, data, sel=True, mark=False, mark_symbol=u'\u2022'):
+    def __init__(self, data, marks, sel=False):
         self.sel = sel
         self.id = data.id
         self.data = data
@@ -19,13 +20,12 @@ class ItemWidget(urwid.WidgetWrap):
             pass_symbol = u'\u2714'
         elif data.pass_status == 'notac':
             pass_symbol = u'\u2718'
-        if mark:
-            pass_symbol += mark_symbol
-        text = str(data.id).ljust(4) + pass_symbol
+        text = str(data.id)
+        mark = make_mark(marks, data.id)
         self.item = [
-            ('fixed', 15, urwid.Padding(urwid.AttrWrap(
-                urwid.Text(text),
-                lockbody, 'focus'), left=2)),
+            (4, urwid.AttrWrap(urwid.Text(text), lockbody, 'focus')),
+            (2, urwid.AttrWrap(urwid.Text(pass_symbol), lockbody, 'focus')),
+            (10, urwid.AttrWrap(urwid.Text(mark), lockbody, 'focus')),
             urwid.AttrWrap(urwid.Text('%s' % data.title), lockbody, 'focus'),
             (15, urwid.AttrWrap(urwid.Text('%s' % data.acceptance), lockbody, 'focus')),
             (15, urwid.AttrWrap(urwid.Text('%s' % data.difficulty), lockbody, 'focus')),
@@ -47,9 +47,9 @@ class HomeView(urwid.Frame):
     def __init__(self, data, header, terminal=None):
         self.terminal = terminal
         title = [
-            ('fixed', 15, urwid.Padding(urwid.AttrWrap(
-                urwid.Text('#'),
-                'body', 'focus'), left=2)),
+            (4, urwid.AttrWrap(urwid.Text('#'), 'body', 'focus')),
+            (2, urwid.AttrWrap(urwid.Text(''), 'body', 'focus')),
+            (10, urwid.AttrWrap(urwid.Text('Tag'), 'body', 'focus')),
             urwid.AttrWrap(urwid.Text('Title'), 'body', 'focus'),
             (15, urwid.AttrWrap(urwid.Text('Acceptance'), 'body', 'focus')),
             (15, urwid.AttrWrap(urwid.Text('Difficulty'), 'body', 'focus')),
@@ -62,7 +62,6 @@ class HomeView(urwid.Frame):
         urwid.Frame.__init__(self, urwid.AttrWrap(self.listbox, 'body'), header=header_pile)
         self.last_sort = {'attr': 'id', 'reverse': True}
         self.last_search_text = None
-        self.mark_symbol = get_mark_symbol(self.marks)
 
     def sort_list(self, attr, cmp=None):
         if attr == self.last_sort['attr']:
@@ -109,14 +108,6 @@ class HomeView(urwid.Frame):
             self.listbox.focus_position = len(self.listbox.body) - 1
         elif key is 'n':
             self.handle_search(self.last_search_text, True)
-        elif key is 't':
-            quiz_id = str(self.listbox.get_focus()[0].id)
-            add_mark(self.marks, quiz_id)
-            text = self.listbox.get_focus()[0].item[0][2].base_widget.text
-            if self.marks[quiz_id]['t']:
-                self.listbox.get_focus()[0].item[0][2].base_widget.set_text(text + self.mark_symbol)
-            else:
-                self.listbox.get_focus()[0].item[0][2].base_widget.set_text(text[0:-1])
         else:
             return urwid.Frame.keypress(self, size, key)
 
@@ -138,15 +129,11 @@ class HomeView(urwid.Frame):
                     self.listbox.focus_position = i
                     break
 
+
 def make_itemwidgets(data, marks):
     items = []
-    mark_symbol = get_mark_symbol(marks)
     for item in data:
-        quiz_id = str(item.id)
-        mark = False
-        if quiz_id in marks and 't' in marks[quiz_id]:
-            mark = marks[quiz_id]['t']
-        items.append(ItemWidget(item, mark=mark, mark_symbol=mark_symbol))
+        items.append(ItemWidget(item, marks=marks))
     return items
 
 def is_string_an_integer(s):
@@ -155,6 +142,8 @@ def is_string_an_integer(s):
         return True
     except ValueError:
         return False
+    except TypeError:
+        return False
 
 def load_marks():
     if not os.path.exists(MARK_FILE):
@@ -162,16 +151,8 @@ def load_marks():
     with open(MARK_FILE, 'r') as f:
         return json.load(f)
 
-def save_marks(data):
-    with open(MARK_FILE, 'w') as f:
-        json.dump(data, f)
-
-def add_mark(data, quiz_id):
-    if quiz_id in data and 't' in data[quiz_id]:
-        data[quiz_id]['t'] = not data[quiz_id]['t']
-    else:
-        data[quiz_id] = {'t': True}
-    save_marks(data)
-
-def get_mark_symbol(marks):
-    return u'\u2022' if 'symbol' not in marks else marks['symbol']
+def make_mark(marks, quiz_id):
+    quiz_id = str(quiz_id)
+    if quiz_id not in marks:
+        return ''
+    return ' '.join(marks[quiz_id])

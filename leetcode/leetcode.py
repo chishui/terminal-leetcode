@@ -4,7 +4,7 @@ import json
 import requests
 import logging
 from bs4 import BeautifulSoup
-from .config import Config
+from .config import config
 from .model import QuizItem
 
 BASE_URL = 'https://leetcode.com'
@@ -13,7 +13,7 @@ HOME_URL = BASE_URL + '/problemset/algorithms'
 LOGIN_URL = BASE_URL + '/accounts/login/'
 HOME = os.path.expanduser('~')
 CONFIG = os.path.join(HOME, '.config', 'leetcode')
-#logging.basicConfig(filename=os.path.join(CONFIG,'running.log'),format='%(asctime)s %(message)s',level=logging.DEBUG)
+logging.basicConfig(filename=os.path.join(CONFIG,'running.log'),format='%(asctime)s %(message)s',level=logging.DEBUG)
 DATA_FILE = os.path.join(CONFIG, 'leetcode_home.txt')
 
 headers = {
@@ -29,8 +29,7 @@ headers = {
 class Leetcode(object):
     def __init__(self):
         self.items = []
-        self.config = Config()
-        self.config.load()
+        config.load()
         self.session = requests.session()
         self.cookies = None
         self.is_login = False
@@ -103,6 +102,7 @@ class Leetcode(object):
         if error:
             return
         text = r.text.encode('utf-8')
+        #logging.info(text)
         text = text.replace('<br>', '')
         bs = BeautifulSoup(text, 'lxml')
         #logging.info(bs)
@@ -120,7 +120,7 @@ class Leetcode(object):
         body = re.sub('\n{3,}', '\n\n', body).strip()
         # get sample code
         rawCode = bs.find("div", attrs={"ng-controller": "AceCtrl as aceCtrl"}).attrs["ng-init"]
-        language = format_language_text(self.config.language)
+        language = format_language_text(config.language)
         pattern = "\\'text\\':\s\\'%s\\',\s\\'defaultCode\\':\s\\'(.*?)\\'" % language
         content = re.search(pattern, rawCode).group(1).\
               encode("utf-8").decode("unicode-escape").\
@@ -129,7 +129,7 @@ class Leetcode(object):
 
     def login(self):
         global headers
-        if not self.config.username or not self.config.password:
+        if not config.username or not config.password:
             return False
 
         login_data = {}
@@ -138,8 +138,8 @@ class Leetcode(object):
             return False
         csrftoken = res.cookies['csrftoken']
         login_data['csrfmiddlewaretoken'] = csrftoken
-        login_data['login'] = self.config.username
-        login_data['password'] = self.config.password
+        login_data['login'] = config.username
+        login_data['password'] = config.password
         login_data['remember'] = "off"
         res, error = retrieve(self.session, LOGIN_URL, headers=headers, method='POST', data=login_data)
         if error:

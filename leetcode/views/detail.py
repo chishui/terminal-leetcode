@@ -6,14 +6,15 @@ import urwid
 from .viewhelper import vim_key_map
 from ..code import *
 from ..leetcode import BASE_URL
+from ..editor import edit
+from ..config import config
 
 class DetailView(urwid.Frame):
     '''
         Quiz Item Detail View
     '''
-    def __init__(self, data, config, loop = None):
+    def __init__(self, data, loop = None):
         self.data = data
-        self.config = config
         self.loop = loop
         blank = urwid.Divider()
         view_title = urwid.AttrWrap(urwid.Text(self.data.title), 'body')
@@ -63,32 +64,23 @@ class DetailView(urwid.Frame):
             return urwid.Frame.keypress(self, size, key)
 
     def edit_code(self, newcode=False):
-        if not self.config.path:
+        if not config.path:
             return
-        if not os.path.exists(self.config.path):
-            os.makedirs(self.config.path)
+        if not os.path.exists(config.path):
+            os.makedirs(config.path)
 
-        filepath = os.path.join(self.config.path, str(self.data.id) + '.' + self.config.ext)
+        filepath = os.path.join(config.path, str(self.data.id) + '.' + config.ext)
         if newcode:
-            index = 1
-            while os.path.exists(filepath):
-                filepath =  os.path.join(self.config.path, str(self.data.id)\
-                            + '-' + str(index) + '.' + self.config.ext)
-                index = index + 1
+            filepath = unique_file_name(filepath)
 
-        code = prepare_code(self.data.code, self.config.language, filepath)
+        code = prepare_code(self.data.code, config.language, filepath)
         if not os.path.exists(filepath):
             with open(filepath, 'w') as f:
+                if config.keep_quiz_detail:
+                    write_quiz_detail(self.data, f)
                 f.write(code)
-        cmd = os.environ.get('EDITOR', 'vi') + ' ' + filepath
-        current_directory = os.getcwd()
-        os.chdir(self.config.path)
-        if is_inside_tmux():
-            open_in_new_tmux_window(cmd)
-        else:
-            subprocess.call(cmd, shell=True)
-            delay_refresh_detail(self.loop)
-        os.chdir(current_directory)
+        # open editor to edit code
+        edit(filepath, self.loop)
 
     def get_discussion_url(self):
         item_url = self.data.url.strip('/')
@@ -101,5 +93,3 @@ class DetailView(urwid.Frame):
 @generate_makefile
 def prepare_code(code, language, filepath):
     return code
-
-

@@ -1,6 +1,7 @@
 import os
 from functools import wraps
 from .config import CONFIG_FOLDER
+import subprocess
 
 SNIPPET_FOLDER = os.path.join(CONFIG_FOLDER, 'snippet')
 BEFORE = os.path.join(SNIPPET_FOLDER, 'before')
@@ -36,9 +37,23 @@ def generate_makefile(func):
         return func(code, language, filepath)
     return wrapper
 
-def is_inside_tmux():
-    return 'TMUX' in os.environ
+def write_quiz_detail(data, f):
+    lines = data.body.split('\n')
+    f.write('/*\n')
+    comment_symbol = "* "
+    for line in lines:
+        f.write(comment_symbol)
+        f.write(line.encode('utf8') + '\n')
+    f.write('*/\n')
 
-def open_in_new_tmux_window(edit_cmd):
-    cmd = "tmux split-window -h '%s'" % edit_cmd
-    os.system(cmd)
+def unique_file_name(filepath):
+    if not os.path.exists(filepath):
+        return filepath
+
+    path, ext = os.path.splitext(filepath)
+    path, filename = os.path.split(path)
+    index = 1
+    while os.path.exists(filepath):
+        filepath =  os.path.join(path, filename + '-' + str(index) + ext)
+        index = index + 1
+    return filepath
