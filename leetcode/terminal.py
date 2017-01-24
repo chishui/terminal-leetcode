@@ -15,7 +15,7 @@ palette = [
     ('focus', 'white', ''),
     ('head', 'white', 'dark gray'),
     ('lock', 'dark gray', ''),
-    ('tag', 'white', 'light cyan', 'standout')
+    ('tag', 'dark red', '')
     ]
 
 DetailData = namedtuple('DetailData', ['title', 'body', 'code', 'id', 'url'])

@@ -3,14 +3,14 @@ import re
 import json
 import urwid
 from .viewhelper import vim_key_map
-from ..config import MARK_FILE
+from ..config import TAG_FILE
 import logging
 
 class ItemWidget(urwid.WidgetWrap):
     '''
         Quiz List Item View
     '''
-    def __init__(self, data, marks, sel=False):
+    def __init__(self, data, marks, sel=True):
         self.sel = sel
         self.id = data.id
         self.data = data
@@ -25,7 +25,7 @@ class ItemWidget(urwid.WidgetWrap):
         self.item = [
             (4, urwid.AttrWrap(urwid.Text(text), lockbody, 'focus')),
             (2, urwid.AttrWrap(urwid.Text(pass_symbol), lockbody, 'focus')),
-            (10, urwid.AttrWrap(urwid.Text(mark), lockbody, 'focus')),
+            (10, urwid.AttrWrap(urwid.Text(mark), 'tag', 'focus')),
             urwid.AttrWrap(urwid.Text('%s' % data.title), lockbody, 'focus'),
             (15, urwid.AttrWrap(urwid.Text('%s' % data.acceptance), lockbody, 'focus')),
             (15, urwid.AttrWrap(urwid.Text('%s' % data.difficulty), lockbody, 'focus')),
@@ -146,9 +146,9 @@ def is_string_an_integer(s):
         return False
 
 def load_marks():
-    if not os.path.exists(MARK_FILE):
+    if not os.path.exists(TAG_FILE):
         return {}
-    with open(MARK_FILE, 'r') as f:
+    with open(TAG_FILE, 'r') as f:
         return json.load(f)
 
 def make_mark(marks, quiz_id):
