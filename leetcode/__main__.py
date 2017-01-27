@@ -1,6 +1,11 @@
 from .terminal import Terminal
+from .log import init_logger
 
 def main():
     """Main entry point"""
-    term = Terminal()
-    term.run()
+    init_logger()
+    try:
+        term = Terminal()
+        term.run()
+    except Exception:
+        pass

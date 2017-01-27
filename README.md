@@ -49,9 +49,23 @@ You can set your programming language in config.cfg as:
 ........
 language=Java
 ```
-to see default sample code in quiz detail view in your favorate language.  
+to see default sample code in quiz detail view in your favorite language.  
 Please make sure to use Leetcode supported programming languages and use the string exactly 
 the same as it appears in Leetcode.    
+
+### Tags
+You can customize your "Tag" column by adding a json file named tag.json into ~/.config/leetcode folder.  
+The format of tag.json is showed below:  
+```
+{
+  "1" : ["F", "G"],
+  "10" : ["F"],
+  ......
+}
+```
+By adding this file, quiz 1 will have a "F" and "G" tag and quiz 10 will have a "F" tag.  
+You can use this feature to add company tag on quizzes.  
+I have added a "F" tag sample file in "tags" folder. You could try this file to see all "F" tag quizzes.  
 ### Writing Code
 Terminal-Leetcode allows you to open editor to edit default code you are viewing.  
 You can set your code editing settings in config.cfg as:
@@ -63,13 +77,19 @@ path=~/program/leetcode # code file directory
 ```
 Then when you are in quiz detail view, press ``e`` to open editor to edit code sample.  
 Code sample is saved into directory you set in config.cfg automatically with file name combined
-with quiz id and file extention you set.  
+with quiz id and file extension you set.  
 Default editor is vim, you can set ``export EDITOR=***`` to change editor. You can refer to
 [this article](http://sweetme.at/2013/09/03/how-to-open-a-file-in-sublime-text-2-or-3-from-the-command-line-on-mac-osx/)
 to use Sublime Text as command line editor.
 #### Tmux Support
 If you're using Terminal-Leetcode inside of a tmux session, when you press ``e``, current tmux window will be
 splitted vertically and an editor is opened inside the new created tmux pane.
+This feature could be turned on and off by config option in config.cfg as:  
+```
+[leetcode]
+........
+tmux_support=true/false
+```
 #### Code Snippet
 Two code snippets can be used when creating code file.  
 You can create files ``before`` and ``after`` in ``~/.config/leetcode/snippet``. Code snippet in ``before``
@@ -114,7 +134,7 @@ after you finish the code, you can use ``make`` directly to compile your code.
 
 
 # Controls:
-- Press ``H`` to see help infomation.  
+- Press ``H`` to see help information.  
 - Press ``up`` and ``down`` to go through quiz list.  
 - Press ``enter`` or ``right`` to see a quiz detail, and press ``left`` to go back.  
 - Press ``R`` in quiz list view to retrieve quiz from website.  
@@ -131,8 +151,6 @@ In quiz detail view, press ``n`` will always create a new sample code file.
 - Press ``3`` in quiz list view to sort quiz list by acceptance.
 - Press ``4`` in quiz list view to sort quiz list by difficulty.  
 Vim's moving keys ``h``, ``j``, ``k``, ``l``, ``ctrl+f``, ``ctrl+b`` are supported.
-
-
 
 # TODO
 - Test

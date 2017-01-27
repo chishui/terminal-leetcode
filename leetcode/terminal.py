@@ -2,6 +2,7 @@ import sys
 from threading import Thread
 from collections import namedtuple
 import urwid
+import logging
 from .leetcode import Leetcode
 from views.home import HomeView
 from views.detail import DetailView
@@ -9,13 +10,15 @@ from views.help import HelpView
 from views.loading import LoadingView
 from views.viewhelper import *
 from .config import config
+import auth
 
 palette = [
     ('body', 'dark cyan', ''),
     ('focus', 'white', ''),
     ('head', 'white', 'dark gray'),
     ('lock', 'dark gray', ''),
-    ('tag', 'dark red', '')
+    ('tag', 'white', 'light cyan', 'standout'),
+    ('hometag', 'dark red', '')
     ]
 
 DetailData = namedtuple('DetailData', ['title', 'body', 'code', 'id', 'url'])
@@ -32,6 +35,7 @@ class Terminal(object):
         self.detail_view = None
         self.search_view = None
         self.loading_view = None
+        self.logger = logging.getLogger(__name__)
 
     @property
     def current_view(self):
@@ -160,8 +164,11 @@ class Terminal(object):
         delay_refresh(self.loop)
 
     def run_retrieve_home(self):
-        success = self.leetcode.login()
-        if success:
+        if self.leetcode.is_login:
+            success = True
+        else:
+            self.leetcode.is_login = auth.login()
+        if self.leetcode.is_login:
             if self.loading_view:
                 self.loading_view.set_text('Loading')
             data = self.leetcode.hard_retrieve_home()
@@ -173,6 +180,8 @@ class Terminal(object):
         if ret:
             title, body, code = ret
             self.retrieve_detail_done(title, body, code)
+        else:
+            self.logger.error('get detail %s fail', data.id)
 
     def run(self):
         self.loop = urwid.MainLoop(None, palette, unhandled_input=self.keystroke)
@@ -182,8 +191,10 @@ class Terminal(object):
         try:
             self.loop.run()
         except KeyboardInterrupt:
-            self.clear_thread()
             sys.exit()
+        finally:
+            self.logger.info("clear thread")
+            self.clear_thread()
 
     def clear_thread(self):
         if self.loading_view:

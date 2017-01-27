@@ -25,7 +25,7 @@ class ItemWidget(urwid.WidgetWrap):
         self.item = [
             (4, urwid.AttrWrap(urwid.Text(text), lockbody, 'focus')),
             (2, urwid.AttrWrap(urwid.Text(pass_symbol), lockbody, 'focus')),
-            (10, urwid.AttrWrap(urwid.Text(mark), 'tag', 'focus')),
+            (10, urwid.AttrWrap(urwid.Text(mark), 'hometag', 'focus')),
             urwid.AttrWrap(urwid.Text('%s' % data.title), lockbody, 'focus'),
             (15, urwid.AttrWrap(urwid.Text('%s' % data.acceptance), lockbody, 'focus')),
             (15, urwid.AttrWrap(urwid.Text('%s' % data.difficulty), lockbody, 'focus')),
