@@ -26,13 +26,15 @@ try:
 except:
     pass
 
+logger = logging.getLogger(__name__)
+
 class NetworkError(Exception):
     def __init__(self, message, code):
-        if not isinstance(message, str) or message == '':
+        if not message or message == '':
             self.message = 'Network error!'
         else:
             self.message = '%s code: %d' % (message, code)
-        print self.message
+        logger.error(self.message)
 
 def login():
     logger = logging.getLogger(__name__)

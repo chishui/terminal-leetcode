@@ -12,6 +12,14 @@ This project is inspired by [RTV](https://github.com/michael-lazar/rtv).
 [![PyPI](https://img.shields.io/pypi/v/nine.svg?maxAge=2592000)](https://pypi.python.org/pypi/terminal-leetcode)
 [![PyPI](https://img.shields.io/badge/python-2.7-blue.svg?maxAge=2592000)](https://pypi.python.org/pypi/terminal-leetcode)
 
+--------------
+# March 22th Update 
+#### Add code submit function.
+After finishing your code, press ``s`` at quiz detail view to submit your code to leetcode.
+#### Add company tag support.
+You can company tag to terminal-leetcode home view column. The tag file is in JSON format which can be easily  
+edit and share. You can find tag file of Facebook from tags directory.
+
 ---------------
 # Requirements
 - Python 2.7  
@@ -146,6 +154,7 @@ In quiz detail view, press ``n`` will always create a new sample code file.
 - Press ``t`` in quiz list view to add tag for quiz.
 - Press ``e`` in quiz detail view to open editor to edit code.
 - Press ``d`` in quiz detail view to open discussion page in web browser.
+- Press ``s`` in quiz detail view to submit your code.
 - Press ``1`` in quiz list view to sort quiz list by id.
 - Press ``2`` in quiz list view to sort quiz list by title.
 - Press ``3`` in quiz list view to sort quiz list by acceptance.
@@ -154,7 +163,7 @@ Vim's moving keys ``h``, ``j``, ``k``, ``l``, ``ctrl+f``, ``ctrl+b`` are support
 
 # TODO
 - Test
-- Submit code
+- ~~Submit code~~
 - ~~User login~~
 - ~~Quiz list sort~~
 - ~~Install with pip~~

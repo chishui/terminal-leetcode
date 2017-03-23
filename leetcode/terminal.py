@@ -3,11 +3,12 @@ from threading import Thread
 from collections import namedtuple
 import urwid
 import logging
+import time
 from .leetcode import Leetcode
 from views.home import HomeView
 from views.detail import DetailView
 from views.help import HelpView
-from views.loading import LoadingView
+from views.loading import *
 from views.viewhelper import *
 from .config import config
 import auth
@@ -31,6 +32,7 @@ class Terminal(object):
         self.leetcode = Leetcode()
         self.help_view = None
         self.quit_confirm_view = None
+        self.submit_confirm_view = None
         self.view_stack = []
         self.detail_view = None
         self.search_view = None
@@ -60,6 +62,11 @@ class Terminal(object):
             else:
                 self.go_back()
 
+        elif self.submit_confirm_view and self.current_view == self.submit_confirm_view:
+            self.go_back()
+            if key is 'y':
+                self.send_code(self.detail_view.data)
+
         elif self.current_view == self.search_view:
             if key is 'enter':
                 text = self.search_view.contents[1][0].original_widget.get_edit_text()
@@ -70,6 +77,9 @@ class Terminal(object):
 
         elif key in ('q', 'Q'):
             self.goto_view(self.make_quit_confirmation())
+
+        elif key is 's':
+            self.goto_view(self.make_submit_confirmation())
 
         elif not self.is_home and (key is 'left' or key is 'h'):
             self.go_back()
@@ -87,7 +97,7 @@ class Terminal(object):
         self.goto_view(self.search_view)
 
     def enter_detail(self, data):
-        self.show_loading('Loading Quiz', 17)
+        self.show_loading('Loading Quiz', 17, self.current_view)
         self.t = Thread(target=self.run_retrieve_detail, args=(data,))
         self.t.start()
 
@@ -105,6 +115,12 @@ class Terminal(object):
                                                ('relative', 100), 'bottom', None)
         return self.quit_confirm_view
 
+    def make_submit_confirmation(self):
+        text = urwid.AttrMap(urwid.Text('Do you want to submit your code ? (y/n)'), 'body')
+        self.submit_confirm_view = urwid.Overlay(text, self.current_view, 'left',
+                                               ('relative', 100), 'bottom', None)
+        return self.submit_confirm_view
+
     def make_search_view(self):
         text = urwid.AttrMap(urwid.Edit('Search by id: ', ''), 'body')
         self.search_view = urwid.Overlay(text, self.current_view, 'left',
@@ -112,7 +128,7 @@ class Terminal(object):
         return self.search_view
 
     def make_detailview(self, data):
-        self.detail_view = DetailView(data, self.loop)
+        self.detail_view = DetailView(data, self.leetcode, self.loop)
         return self.detail_view
 
     def make_listview(self, data):
@@ -138,8 +154,8 @@ class Terminal(object):
         self.help_view = HelpView()
         return self.help_view
 
-    def show_loading(self, text, width):
-        self.loading_view = LoadingView(text, width, self.loop)
+    def show_loading(self, text, width, host_view=urwid.SolidFill()):
+        self.loading_view = LoadingView(text, width, host_view, self.loop)
         self.loop.widget = self.loading_view
         self.loading_view.start()
 
@@ -181,7 +197,40 @@ class Terminal(object):
             title, body, code = ret
             self.retrieve_detail_done(title, body, code)
         else:
+            toast = Toast('Request fail!', 10, self.current_view, self.loop)
+            toast.show()
             self.logger.error('get detail %s fail', data.id)
+
+    def run_send_code(self, data):
+        success, text_or_id = self.leetcode.submit_code(data)
+        if success:
+            self.loading_view.set_text('Retrieving')
+            code = 1
+            while code > 0:
+                r = self.leetcode.check_submission_result(text_or_id)
+                code = r[0]
+
+            self.end_loading()
+            if code < 0:
+                toast = Toast('error: %s' % r[1], 10 + len(r[1]), self.current_view, self.loop)
+            else:
+                runtime = r[3]
+                if runtime == 'N/A':
+                    toast = Toast('faied test: %d/%d' % (r[1], r[2]), 20, self.current_view, self.loop)
+                else:
+                    toast = Toast('success, time: %s' % r[3], 20, self.current_view, self.loop)
+            toast.show()
+            delay_refresh(self.loop)
+        else:
+            self.end_loading()
+            toast = Toast('error: %s' % text_or_id, 10 + len(text_or_id), self.current_view, self.loop)
+            toast.show()
+            self.logger.error('send data fail')
+
+    def send_code(self, data):
+        self.show_loading('Sending code', 17, self.current_view)
+        self.t = Thread(target=self.run_send_code, args=(data,))
+        self.t.start()
 
     def run(self):
         self.loop = urwid.MainLoop(None, palette, unhandled_input=self.keystroke)

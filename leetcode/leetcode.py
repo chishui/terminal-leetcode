@@ -2,14 +2,23 @@ import os
 import re
 import json
 import logging
+import requests
 from bs4 import BeautifulSoup
 from .config import config
 from .model import QuizItem
-from .auth import requests, is_login, headers, NetworkError
+from .auth import requests as req, is_login, headers, NetworkError
+from .code import *
 
 BASE_URL = 'https://leetcode.com'
 API_URL = BASE_URL + '/api/problems/algorithms/'
 HOME_URL = BASE_URL + '/problemset/algorithms'
+SUBMISSION_URL = BASE_URL + '/submissions/detail/{id}/check/'
+
+def merge_two_dicts(x, y):
+    """Given two dicts, merge them into a new dict as a shallow copy."""
+    z = x.copy()
+    z.update(y)
+    return z
 
 class Leetcode(object):
     def __init__(self):
@@ -27,7 +36,7 @@ class Leetcode(object):
         return [i for i in self.items if i.pass_status == 'ac']
 
     def hard_retrieve_home(self):
-        r = retrieve(requests, API_URL)
+        r = retrieve(req, API_URL)
         text = r.text.encode('utf-8')
         return self.parse_home_API(text)
 
@@ -74,14 +83,16 @@ class Leetcode(object):
         return self.items
 
     def retrieve_detail(self, item):
-        r = retrieve(requests, BASE_URL + item.url)
+        r = retrieve(req, BASE_URL + item.url)
+        if r.status_code != 200:
+            return None
         text = r.text.encode('utf-8')
         text = text.replace('<br>', '')
         bs = BeautifulSoup(text, 'lxml')
 
         if bs.find('form', 'form-signin'):
             self.session.cookies.clear()
-            r = retrieve(requests, BASE_URL + item.url)
+            r = retrieve(req, BASE_URL + item.url)
 
         content = bs.find('div', 'question-content')
         preprocess_bs(content)
@@ -96,6 +107,58 @@ class Leetcode(object):
               encode("utf-8").decode("unicode-escape").\
               replace("\r\n", "\n")
         return title, body, content
+
+    def submit_code(self, item):
+        filepath = get_code_file_path(item.id)
+        if not os.path.exists(filepath):
+            return (False, 'code file not exist!')
+        code = get_code_for_submission(filepath)
+        code = code.replace('\n', '\r\n')
+        self.logger.info(item)
+        body = { 'question_id': item.id,
+                'test_mode': False,
+                'lang': 'cpp',
+                'judge_type': 'large',
+                'typed_code': code}
+
+        for ck in req.cookies:
+            if ck.name == 'csrftoken':
+                csrftoken = ck.value
+
+        newheaders = merge_two_dicts(headers, {'Origin': BASE_URL,
+            'Referer': BASE_URL + item.url + '/?tab=Description',
+            'DNT': 1,
+            'Content-Type': 'application/json;charset=UTF-8',
+            'Accept': 'application/json',
+            'X-CSRFToken': csrftoken,
+            'X-Requested-With': 'XMLHttpRequest'})
+
+        r = retrieve(req, BASE_URL + item.url + '/submit/', method='POST', data=json.dumps(body), headers=newheaders)
+        if r.status_code != 200:
+            return (False, 'Request failed!')
+        text = r.text.encode('utf-8')
+        data = json.loads(text)
+
+        if 'error' in data:
+            return (False, data['error'])
+        return (True, data['submission_id'])
+
+    def check_submission_result(self, submission_id):
+        url = SUBMISSION_URL.format(id=submission_id)
+        r = retrieve(req, url)
+        if r.status_code != 200:
+            return (-100, 'Request failed!')
+        text = r.text.encode('utf-8')
+        data = json.loads(text)
+        if data['state'] == 'PENDING':
+            return (1,)
+        elif data['state'] == 'STARTED':
+            return (2,)
+        elif data['state'] == 'SUCCESS':
+            if data['run_success']:
+                return (0, data['total_correct'], data['total_testcases'], data['status_runtime'])
+            else:
+                return (-1, data['compile_error'])
 
 
 def preprocess_bs(bs):
@@ -116,10 +179,7 @@ def retrieve(session, url, headers=None, method='GET', data=None):
             r = session.get(url, headers=headers)
         elif method == 'POST':
             r = session.post(url, headers=headers, data=data)
-        if r.status_code != 200:
-            raise NetworkError('Network error: url: %s' % url, r.status_code)
-        else:
-            return r
+        return r
     except requests.exceptions.RequestException as e:
         raise NetworkError('Network error: url: %s' % url, r.status_code)
 

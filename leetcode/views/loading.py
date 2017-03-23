@@ -8,12 +8,12 @@ class LoadingView(urwid.Frame):
     '''
         Loading View When Doing HTTP Request
     '''
-    def __init__(self, text, width, loop = None):
+    def __init__(self, text, width, host_view, loop = None):
         self.running = False
         self.lock = EasyLock()
         self.loop = loop
         self.overlay = urwid.Overlay(
-                    urwid.LineBox(urwid.Text(text)), urwid.SolidFill(),
+                    urwid.LineBox(urwid.Text(text)), host_view, #urwid.SolidFill(),
                     'center', width, 'middle', None)
         urwid.Frame.__init__(self, self.overlay)
 
@@ -49,5 +49,27 @@ class LoadingView(urwid.Frame):
                 self.overlay.contents[1][0].base_widget.set_text(text)
             delay_refresh(self.loop)
             time.sleep(0.8)
+
+
+class Toast(urwid.Frame):
+    '''
+        Toast View
+    '''
+    def __init__(self, text, width, host_view, loop = None):
+        self.loop = loop
+        self.host_view = host_view
+        self.overlay = urwid.Overlay(
+                    urwid.LineBox(urwid.Text(text)), host_view, #urwid.SolidFill(),
+                    'center', width, 'middle', None)
+        urwid.Frame.__init__(self, self.overlay)
+
+    def keypress(self, size, key):
+        self.destroy()
+
+    def show(self):
+        self.loop.widget = self
+
+    def destroy(self):
+        self.loop.widget = self.host_view
 
 

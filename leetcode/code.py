@@ -1,6 +1,6 @@
 import os
 from functools import wraps
-from .config import CONFIG_FOLDER
+from .config import CONFIG_FOLDER, config
 import subprocess
 
 SNIPPET_FOLDER = os.path.join(CONFIG_FOLDER, 'snippet')
@@ -37,14 +37,14 @@ def generate_makefile(func):
         return func(code, language, filepath)
     return wrapper
 
-def write_quiz_detail(data, f):
-    lines = data.body.split('\n')
-    f.write('/*\n')
-    comment_symbol = "* "
-    for line in lines:
-        f.write(comment_symbol)
-        f.write(line.encode('utf8') + '\n')
-    f.write('*/\n')
+#def write_quiz_detail(data, f):
+    #lines = data.body.split('\n')
+    #f.write('/*\n')
+    #comment_symbol = "* "
+    #for line in lines:
+        #f.write(comment_symbol)
+        #f.write(line.encode('utf8') + '\n')
+    #f.write('*/\n')
 
 def unique_file_name(filepath):
     if not os.path.exists(filepath):
@@ -57,3 +57,17 @@ def unique_file_name(filepath):
         filepath =  os.path.join(path, filename + '-' + str(index) + ext)
         index = index + 1
     return filepath
+
+def get_code_file_path(quiz_id):
+    if not config.path:
+        return
+    if not os.path.exists(config.path):
+        os.makedirs(config.path)
+
+    return os.path.join(config.path, str(quiz_id) + '.' + config.ext)
+
+def get_code_for_submission(filepath):
+    data = get_data(filepath)
+    before = get_data(BEFORE)
+    after = get_data(AFTER)
+    return data.replace(before, '').replace(after, '')

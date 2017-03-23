@@ -3,6 +3,7 @@ import re
 import subprocess
 import webbrowser
 import urwid
+import logging
 from .viewhelper import vim_key_map
 from ..code import *
 from ..leetcode import BASE_URL
@@ -13,9 +14,11 @@ class DetailView(urwid.Frame):
     '''
         Quiz Item Detail View
     '''
-    def __init__(self, data, loop = None):
+    def __init__(self, data, leetcode, loop = None):
         self.data = data
         self.loop = loop
+        self.logger = logging.getLogger(__name__)
+        self.leetcode = leetcode
         blank = urwid.Divider()
         view_title = urwid.AttrWrap(urwid.Text(self.data.title), 'body')
         view_text = self.make_body_widgets()
@@ -64,20 +67,15 @@ class DetailView(urwid.Frame):
             return urwid.Frame.keypress(self, size, key)
 
     def edit_code(self, newcode=False):
-        if not config.path:
-            return
-        if not os.path.exists(config.path):
-            os.makedirs(config.path)
-
-        filepath = os.path.join(config.path, str(self.data.id) + '.' + config.ext)
+        filepath = get_code_file_path(self.data.id)
         if newcode:
             filepath = unique_file_name(filepath)
 
         code = prepare_code(self.data.code, config.language, filepath)
         if not os.path.exists(filepath):
             with open(filepath, 'w') as f:
-                if config.keep_quiz_detail:
-                    write_quiz_detail(self.data, f)
+                #if config.keep_quiz_detail:
+                    #write_quiz_detail(self.data, f)
                 f.write(code)
         # open editor to edit code
         edit(filepath, self.loop)
