@@ -1,4 +1,3 @@
-============================
 Terminal-Leetcode
 ============================
 Terminal-Leetcode is a terminal based leetcode website viewer.  
