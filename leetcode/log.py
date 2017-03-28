@@ -10,4 +10,4 @@ def init_logger():
             data = json.load(f)
         logging.config.dictConfig(data)
     else:
-        logging.basicConfig(level=logging.info)
+        logging.basicConfig(level=logging.ERROR)
