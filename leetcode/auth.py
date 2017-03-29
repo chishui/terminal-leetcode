@@ -9,6 +9,8 @@ BASE_URL = 'https://leetcode.com'
 LOGIN_URL = BASE_URL + '/accounts/login/'
 API_URL = BASE_URL + '/api/problems/algorithms/'
 
+COOKIE_PATH = os.path.join(CONFIG_FOLDER, 'cookies')
+
 headers = {
     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
     'Accept-Encoding': 'gzip, deflate, sdch',
@@ -20,7 +22,7 @@ headers = {
 }
 
 requests = requests.Session()
-requests.cookies = cookielib.LWPCookieJar(os.path.join(CONFIG_FOLDER, 'cookies'))
+requests.cookies = cookielib.LWPCookieJar(COOKIE_PATH)
 try:
     requests.cookies.load(ignore_discard=True)
 except:

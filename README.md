@@ -35,6 +35,11 @@ Clone the repository
  $ cd terminal-leetcode  
  $ sudo python setup.py install  
 ```
+## For Ubuntu
+Need to install lxml dependencies first on Ubuntu.
+```
+apt-get install libxml2-dev libxslt1-dev python-dev
+```
 # Usage
 To run the program, input ``leetcode`` in terminal    
 ```

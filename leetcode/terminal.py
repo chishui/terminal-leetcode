@@ -180,16 +180,13 @@ class Terminal(object):
         delay_refresh(self.loop)
 
     def run_retrieve_home(self):
-        if self.leetcode.is_login:
-            success = True
-        else:
+        if not self.leetcode.is_login:
             self.leetcode.is_login = auth.login()
-        if self.leetcode.is_login:
-            if self.loading_view:
-                self.loading_view.set_text('Loading')
-            data = self.leetcode.hard_retrieve_home()
-            if data:
-                self.retrieve_home_done(data)
+        if self.loading_view:
+            self.loading_view.set_text('Loading')
+        data = self.leetcode.hard_retrieve_home()
+        if data:
+            self.retrieve_home_done(data)
 
     def run_retrieve_detail(self, data):
         ret = self.leetcode.retrieve_detail(data)
