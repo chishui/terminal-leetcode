@@ -187,6 +187,10 @@ class Terminal(object):
         data = self.leetcode.hard_retrieve_home()
         if data:
             self.retrieve_home_done(data)
+        else:
+            self.end_loading()
+            toast = Toast('Request fail!', 10, self.current_view, self.loop)
+            toast.show()
 
     def run_retrieve_detail(self, data):
         ret = self.leetcode.retrieve_detail(data)

@@ -31,7 +31,7 @@ except:
 logger = logging.getLogger(__name__)
 
 class NetworkError(Exception):
-    def __init__(self, message, code):
+    def __init__(self, message, code=0):
         if not message or message == '':
             self.message = 'Network error!'
         else:
@@ -67,4 +67,4 @@ def is_login():
         return False
     text = r.text.encode('utf-8')
     data = json.loads(text)
-    return data['user_name'] != ''
+    return 'user_name' in data and data['user_name'] != ''

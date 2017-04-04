@@ -37,6 +37,8 @@ class Leetcode(object):
 
     def hard_retrieve_home(self):
         r = retrieve(req, API_URL)
+        if r.status_code != 200:
+            return None
         text = r.text.encode('utf-8')
         return self.parse_home_API(text)
 
@@ -44,22 +46,27 @@ class Leetcode(object):
         difficulty = {1: "Easy", 2: "Medium", 3: "Hard"}
         self.items = []
         json_data = json.loads(text)
-        for quiz in json_data['stat_status_pairs']:
-            if quiz['stat']['question__hide']:
-                continue
 
-            data = {}
-            data['title'] = quiz['stat']['question__title']
-            data['id'] = quiz['stat']['question_id']
-            data['lock'] = not json_data['is_paid'] and quiz['paid_only']
-            data['difficulty'] = difficulty[quiz['difficulty']['level']]
-            data['favorite'] = quiz['is_favor']
-            data['acceptance'] = "%.1f%%" % (float(quiz['stat']['total_acs']) * 100 / float(quiz['stat']['total_submitted']))
-            data['url'] = "/problems/" + quiz['stat']['question__title_slug']
-            data['pass'] = quiz['status']
-            item = QuizItem(data)
-            self.items.append(item)
-        return self.items
+        try:
+            for quiz in json_data['stat_status_pairs']:
+                if quiz['stat']['question__hide']:
+                    continue
+
+                data = {}
+                data['title'] = quiz['stat']['question__title']
+                data['id'] = quiz['stat']['question_id']
+                data['lock'] = not json_data['is_paid'] and quiz['paid_only']
+                data['difficulty'] = difficulty[quiz['difficulty']['level']]
+                data['favorite'] = quiz['is_favor']
+                data['acceptance'] = "%.1f%%" % (float(quiz['stat']['total_acs']) * 100 / float(quiz['stat']['total_submitted']))
+                data['url'] = "/problems/" + quiz['stat']['question__title_slug']
+                data['pass'] = quiz['status']
+                item = QuizItem(data)
+                self.items.append(item)
+            return self.items
+        except AttributeError, e:
+            self.logger.error(e)
+            return None
 
     def parse_home(self, text):
         self.items = []
@@ -94,19 +101,23 @@ class Leetcode(object):
             self.session.cookies.clear()
             r = retrieve(req, BASE_URL + item.url)
 
-        content = bs.find('div', 'question-content')
-        preprocess_bs(content)
-        title = bs.find('div', 'question-title').h3.text.strip()
-        body = content.text.replace(chr(13), '')
-        body = re.sub('\n{3,}', '\n\n', body).strip()
-        # get sample code
-        rawCode = bs.find("div", attrs={"ng-controller": "AceCtrl as aceCtrl"}).attrs["ng-init"]
-        language = format_language_text(config.language)
-        pattern = "\\'text\\':\s\\'%s\\',\s\\'defaultCode\\':\s\\'(.*?)\\'" % language
-        content = re.search(pattern, rawCode).group(1).\
-              encode("utf-8").decode("unicode-escape").\
-              replace("\r\n", "\n")
-        return title, body, content
+        try:
+            content = bs.find('div', 'question-content')
+            preprocess_bs(content)
+            title = bs.find('div', 'question-title').h3.text.strip()
+            body = content.text.replace(chr(13), '')
+            body = re.sub('\n{3,}', '\n\n', body).strip()
+            # get sample code
+            rawCode = bs.find("div", attrs={"ng-controller": "AceCtrl as aceCtrl"}).attrs["ng-init"]
+            language = format_language_text(config.language)
+            pattern = "\\'text\\':\s\\'%s\\',\s\\'defaultCode\\':\s\\'(.*?)\\'" % language
+            content = re.search(pattern, rawCode).group(1).\
+                  encode("utf-8").decode("unicode-escape").\
+                  replace("\r\n", "\n")
+            return title, body, content
+        except AttributeError, e:
+            self.logger.error(e)
+            return None
 
     def submit_code(self, item):
         filepath = get_code_file_path(item.id)
@@ -184,7 +195,7 @@ def retrieve(session, url, headers=None, method='GET', data=None):
             r = session.post(url, headers=headers, data=data)
         return r
     except requests.exceptions.RequestException as e:
-        raise NetworkError('Network error: url: %s' % url, r.status_code)
+        raise NetworkError('Network error: url: %s' % url)
 
 def format_language_text(language):
     language = language.replace('+', '\+')
