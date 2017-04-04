@@ -5,7 +5,9 @@ from leetcode.leetcode import *
 from leetcode.auth import NetworkError
 
 class TestLeetcode(unittest.TestCase):
-    def setUp(self):
+    @mock.patch('leetcode.leetcode.is_login')
+    def setUp(self, mock_isLogin):
+        mock_isLogin.return_value = True
         self.leet = Leetcode()
 
     @mock.patch('leetcode.leetcode.requests.get')
