@@ -100,7 +100,7 @@ class TestLeetcode(unittest.TestCase):
         [{'value': 'cpp', 'text': 'C++', 'defaultCode': 'code'}])">
         </div>
         </body> </html> '''
-        with responses.RequestsMock(assert_all_requests_are_fired=True) as rsps:
+        with responses.RequestsMock(assert_all_requests_are_fired=False) as rsps:
             item = QuizItem({'id': 1,
                             'url': '/hello',
                             'title':'',
@@ -110,15 +110,18 @@ class TestLeetcode(unittest.TestCase):
                             'pass': 'ac'})
             rsps.add(responses.GET, BASE_URL+'/hello',
                       json={"error": "not found"}, status=404)
-            rsps.add(responses.GET, BASE_URL+'/hello',
+            rsps.add(responses.GET, BASE_URL+'/data',
                       body=data, status=200)
-            rsps.add(responses.GET, BASE_URL+'/hello',
+            rsps.add(responses.GET, BASE_URL+'/data2',
                       body=data2, status=200)
-            rsps.add(responses.GET, BASE_URL+'/hello',
+            rsps.add(responses.GET, BASE_URL+'/data3',
                       body=data3, status=200)
             self.assertIsNone(self.leet.retrieve_detail(item))
+            item.url = '/data'
             self.assertIsNone(self.leet.retrieve_detail(item))
+            item.url = '/data2'
             self.assertIsNone(self.leet.retrieve_detail(item))
+            item.url = '/data3'
             a, b, c = self.leet.retrieve_detail(item)
             self.assertEqual(a, 'title')
             self.assertEqual(b, 'content')
