@@ -5,10 +5,11 @@ from leetcode.auth import *
 from leetcode.config import *
 
 class TestAuth(unittest.TestCase):
+    @mock.patch('leetcode.auth.requests.cookies.save')
     @mock.patch('leetcode.auth.config')
     @mock.patch('leetcode.auth.requests.post')
     @mock.patch('leetcode.auth.requests.get')
-    def test_login(self, mock_get, mock_post, mock_config):
+    def test_login(self, mock_get, mock_post, mock_config, mock_save):
         mock_config.username = None
         self.assertFalse(login())
 

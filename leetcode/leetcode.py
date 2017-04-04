@@ -64,7 +64,7 @@ class Leetcode(object):
                 item = QuizItem(data)
                 self.items.append(item)
             return self.items
-        except AttributeError, e:
+        except (KeyError, AttributeError) as e:
             self.logger.error(e)
             return None
 
