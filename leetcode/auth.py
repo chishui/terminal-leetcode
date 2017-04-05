@@ -21,10 +21,10 @@ headers = {
     'Referer': 'https://leetcode.com/accounts/login/',
 }
 
-requests = requests.Session()
-requests.cookies = cookielib.LWPCookieJar(COOKIE_PATH)
+session = requests.Session()
+session.cookies = cookielib.LWPCookieJar(COOKIE_PATH)
 try:
-    requests.cookies.load(ignore_discard=True)
+    session.cookies.load(ignore_discard=True)
 except:
     pass
 
@@ -43,28 +43,40 @@ def login():
     if not config.username or not config.password:
         return False
     login_data = {}
-    r = requests.get(LOGIN_URL, headers=headers)
+    r = retrieve(LOGIN_URL, headers=headers)
     if r.status_code != 200:
         logger.error('login failed')
         return False
-    csrftoken = r.cookies['csrftoken']
-    login_data['csrfmiddlewaretoken'] = csrftoken
+    if 'csrftoken' in r.cookies:
+        csrftoken = r.cookies['csrftoken']
+        login_data['csrfmiddlewaretoken'] = csrftoken
     login_data['login'] = config.username
     login_data['password'] = config.password
     login_data['remember'] = 'on'
-    r = requests.post(LOGIN_URL, headers=headers, data=login_data)
+    r = retrieve(LOGIN_URL, method='POST', headers=headers, data=login_data)
     if r.status_code != 200:
         logger.error('login failed')
         return False
 
     logger.info("login success")
-    requests.cookies.save()
+    session.cookies.save()
     return True
 
 def is_login():
-    r = requests.get(API_URL, headers=headers)
+    r = retrieve(API_URL, headers=headers)
     if r.status_code != 200:
         return False
     text = r.text.encode('utf-8')
     data = json.loads(text)
     return 'user_name' in data and data['user_name'] != ''
+
+
+def retrieve(url, headers=None, method='GET', data=None):
+    try:
+        if method == 'GET':
+            r = session.get(url, headers=headers)
+        elif method == 'POST':
+            r = session.post(url, headers=headers, data=data)
+        return r
+    except requests.exceptions.RequestException as e:
+        raise NetworkError('Network error: url: %s' % url)

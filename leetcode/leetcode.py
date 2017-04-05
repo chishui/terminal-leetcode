@@ -2,11 +2,10 @@ import os
 import re
 import json
 import logging
-import requests
 from bs4 import BeautifulSoup
 from .config import config
 from .model import QuizItem
-from .auth import requests as req, is_login, headers, NetworkError
+from .auth import session, is_login, headers, retrieve
 from .code import *
 
 BASE_URL = 'https://leetcode.com'
@@ -36,7 +35,7 @@ class Leetcode(object):
         return [i for i in self.items if i.pass_status == 'ac']
 
     def hard_retrieve_home(self):
-        r = retrieve(req, API_URL)
+        r = retrieve(API_URL)
         if r.status_code != 200:
             return None
         text = r.text.encode('utf-8')
@@ -90,7 +89,7 @@ class Leetcode(object):
         return self.items
 
     def retrieve_detail(self, item):
-        r = retrieve(req, BASE_URL + item.url)
+        r = retrieve(BASE_URL + item.url)
         if r.status_code != 200:
             return None
         text = r.text.encode('utf-8')
@@ -99,7 +98,7 @@ class Leetcode(object):
 
         if bs.find('form', 'form-signin'):
             self.session.cookies.clear()
-            r = retrieve(req, BASE_URL + item.url)
+            r = retrieve(BASE_URL + item.url)
 
         try:
             content = bs.find('div', 'question-content')
@@ -125,26 +124,25 @@ class Leetcode(object):
             return (False, 'code file not exist!')
         code = get_code_for_submission(filepath)
         code = code.replace('\n', '\r\n')
-        self.logger.info(item)
         body = { 'question_id': item.id,
                 'test_mode': False,
                 'lang': 'cpp',
                 'judge_type': 'large',
                 'typed_code': code}
 
-        for ck in req.cookies:
+        for ck in session.cookies:
             if ck.name == 'csrftoken':
                 csrftoken = ck.value
 
         newheaders = merge_two_dicts(headers, {'Origin': BASE_URL,
             'Referer': BASE_URL + item.url + '/?tab=Description',
-            'DNT': 1,
+            'DNT': '1',
             'Content-Type': 'application/json;charset=UTF-8',
             'Accept': 'application/json',
             'X-CSRFToken': csrftoken,
             'X-Requested-With': 'XMLHttpRequest'})
 
-        r = retrieve(req, BASE_URL + item.url + '/submit/', method='POST', data=json.dumps(body), headers=newheaders)
+        r = retrieve(BASE_URL + item.url + '/submit/', method='POST', data=json.dumps(body), headers=newheaders)
         if r.status_code != 200:
             return (False, 'Request failed!')
         text = r.text.encode('utf-8')
@@ -156,23 +154,26 @@ class Leetcode(object):
 
     def check_submission_result(self, submission_id):
         url = SUBMISSION_URL.format(id=submission_id)
-        r = retrieve(req, url)
+        r = retrieve(url)
         if r.status_code != 200:
             return (-100, 'Request failed!')
         text = r.text.encode('utf-8')
         data = json.loads(text)
-        if data['state'] == 'PENDING':
-            return (1,)
-        elif data['state'] == 'STARTED':
-            return (2,)
-        elif data['state'] == 'SUCCESS':
-            if 'run_success' in data:
-                if data['run_success']:
-                    return (0, data['total_correct'], data['total_testcases'], data['status_runtime'])
+        try:
+            if data['state'] == 'PENDING':
+                return (1,)
+            elif data['state'] == 'STARTED':
+                return (2,)
+            elif data['state'] == 'SUCCESS':
+                if 'run_success' in data:
+                    if data['run_success']:
+                        return (0, data['total_correct'], data['total_testcases'], data['status_runtime'])
+                    else:
+                        return (-1, data['compile_error'])
                 else:
-                    return (-1, data['compile_error'])
-            else:
-                return (-1, 'Unknow error!')
+                    raise KeyError
+        except KeyError:
+            return (-1, 'Unknow error')
 
 
 def preprocess_bs(bs):
@@ -187,15 +188,6 @@ def preprocess_bs(bs):
         if a.text == 'Subscribe':
             a.parent.parent.extract()
 
-def retrieve(session, url, headers=None, method='GET', data=None):
-    try:
-        if method == 'GET':
-            r = session.get(url, headers=headers)
-        elif method == 'POST':
-            r = session.post(url, headers=headers, data=data)
-        return r
-    except requests.exceptions.RequestException as e:
-        raise NetworkError('Network error: url: %s' % url)
 
 def format_language_text(language):
     language = language.replace('+', '\+')

@@ -1,8 +1,9 @@
 import unittest
 import mock
-import responses
 from leetcode.leetcode import *
 from leetcode.auth import NetworkError
+import requests_mock
+import requests
 
 class TestLeetcode(unittest.TestCase):
     @mock.patch('leetcode.leetcode.is_login')
@@ -10,15 +11,6 @@ class TestLeetcode(unittest.TestCase):
         mock_isLogin.return_value = True
         self.leet = Leetcode()
 
-    @mock.patch('leetcode.leetcode.requests.get')
-    def test_retrieve(self, mock_requests):
-        mock_requests.side_effect = requests.exceptions.RequestException()
-        with self.assertRaises(NetworkError):
-            r = retrieve(requests, 'http://127.0.0.1')
-
-        mock_requests.side_effect = requests.exceptions.ConnectionError('bad error')
-        with self.assertRaises(NetworkError):
-            r = retrieve(requests, 'http://127.0.0.1')
 
     def test_retrieve_home(self):
         data = {
@@ -74,15 +66,13 @@ class TestLeetcode(unittest.TestCase):
   "user_name": "",
   "num_total": 507
 }
-        with responses.RequestsMock(assert_all_requests_are_fired=True) as rsps:
-            rsps.add(responses.GET, API_URL,
-                      json={"error": "not found"}, status=404)
-            rsps.add(responses.GET, API_URL,
-                      json={"error": "not found"}, status=200)
-            rsps.add(responses.GET, API_URL,
-                      json=data, status=200)
+
+        with requests_mock.Mocker() as m:
+            m.get(API_URL, status_code=403)
             self.assertIsNone(self.leet.hard_retrieve_home())
+            m.get(API_URL, json={"error": "not found"})
             self.assertIsNone(self.leet.hard_retrieve_home())
+            m.get(API_URL, json=data)
             items = self.leet.hard_retrieve_home()
             self.assertEqual(len(items), 2)
             self.assertEqual(items[0].id, 548)
@@ -100,30 +90,70 @@ class TestLeetcode(unittest.TestCase):
         [{'value': 'cpp', 'text': 'C++', 'defaultCode': 'code'}])">
         </div>
         </body> </html> '''
-        with responses.RequestsMock(assert_all_requests_are_fired=False) as rsps:
-            item = QuizItem({'id': 1,
-                            'url': '/hello',
-                            'title':'',
-                            'acceptance':'',
-                            'difficulty':'Easy',
-                            'lock':True,
-                            'pass': 'ac'})
-            rsps.add(responses.GET, BASE_URL+'/hello',
-                      json={"error": "not found"}, status=404)
-            rsps.add(responses.GET, BASE_URL+'/data',
-                      body=data, status=200)
-            rsps.add(responses.GET, BASE_URL+'/data2',
-                      body=data2, status=200)
-            rsps.add(responses.GET, BASE_URL+'/data3',
-                      body=data3, status=200)
+        item = QuizItem({'id': 1,
+                        'url': '/hello',
+                        'title':'',
+                        'acceptance':'',
+                        'difficulty':'Easy',
+                        'lock':True,
+                        'pass': 'ac'})
+
+        with requests_mock.Mocker() as m:
+            m.get(BASE_URL + '/hello', status_code=403)
             self.assertIsNone(self.leet.retrieve_detail(item))
             item.url = '/data'
+            m.get(BASE_URL + '/data', text=data)
             self.assertIsNone(self.leet.retrieve_detail(item))
             item.url = '/data2'
+            m.get(BASE_URL + '/data2', text=data2)
             self.assertIsNone(self.leet.retrieve_detail(item))
             item.url = '/data3'
+            m.get(BASE_URL + '/data3', text=data3)
             a, b, c = self.leet.retrieve_detail(item)
             self.assertEqual(a, 'title')
             self.assertEqual(b, 'content')
             self.assertEqual(c, 'code')
+
+    @mock.patch('leetcode.leetcode.get_code_for_submission')
+    @mock.patch('leetcode.leetcode.os.path.exists')
+    def test_submit_code(self, mock_exists, mock_get_code):
+        item = QuizItem({'id': 1,
+                        'url': '/hello',
+                        'title':'',
+                        'acceptance':'',
+                        'difficulty':'Easy',
+                        'lock':True,
+                        'pass': 'ac'})
+        mock_exists.return_value = False
+        self.assertFalse(self.leet.submit_code(item)[0])
+
+        mock_exists.return_value = True
+        mock_get_code.return_value = 'code'
+        with requests_mock.Mocker() as m:
+            m.post(BASE_URL + item.url + '/submit/', status_code=402)
+            self.assertFalse(self.leet.submit_code(item)[0])
+
+            m.post(BASE_URL + item.url + '/submit/', text='{"error": "1"}')
+            self.assertFalse(self.leet.submit_code(item)[0])
+
+            m.post(BASE_URL + item.url + '/submit/', text='{"submission_id": 1}')
+            self.assertTrue(self.leet.submit_code(item)[0])
+
+    def test_submission_result(self):
+        url = SUBMISSION_URL.format(id=1)
+        with requests_mock.Mocker() as m:
+            m.get(url, status_code=403)
+            self.assertEqual(self.leet.check_submission_result(1)[0], -100)
+            m.get(url, json={ 'state': 'PENDING' })
+            self.assertEqual(self.leet.check_submission_result(1)[0], 1)
+            m.get(url, json={ 'state': 'STARTED' })
+            self.assertEqual(self.leet.check_submission_result(1)[0], 2)
+            m.get(url, json={ 'state': 'SUCCESS' })
+            self.assertEqual(self.leet.check_submission_result(1)[0], -1)
+            m.get(url, json={ 'state': 'SUCCESS', 'run_success': False})
+            self.assertEqual(self.leet.check_submission_result(1)[0], -1)
+            m.get(url, json={ 'state': 'SUCCESS', 'run_success': True})
+            self.assertEqual(self.leet.check_submission_result(1)[0], -1)
+            m.get(url, json={ 'state': 'SUCCESS', 'run_success': True, 'total_correct':0, 'total_testcases': 0, 'status_runtime': 0})
+            self.assertEqual(self.leet.check_submission_result(1)[0], 0)
 
