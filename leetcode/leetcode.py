@@ -130,6 +130,7 @@ class Leetcode(object):
                 'judge_type': 'large',
                 'typed_code': code}
 
+        csrftoken = ''
         for ck in session.cookies:
             if ck.name == 'csrftoken':
                 csrftoken = ck.value
