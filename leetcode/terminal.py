@@ -1,9 +1,9 @@
 import sys
+import time
+import logging
 from threading import Thread
 from collections import namedtuple
 import urwid
-import logging
-import time
 from .leetcode import Leetcode
 from views.home import HomeView
 from views.detail import DetailView
@@ -89,6 +89,18 @@ class Terminal(object):
                 self.make_helpview()
             self.goto_view(self.help_view)
 
+        elif key is 'R':
+            if self.is_home:
+                self.reload_list()
+
+        elif key is 'f':
+            if self.is_home:
+                self.enter_search()
+
+        elif key in ('enter', 'right'):
+            if self.is_home and self.home_view.is_current_item_enterable():
+                self.enter_detail(self.home_view.get_current_item_data())
+
         else:
             return key
 
@@ -133,7 +145,7 @@ class Terminal(object):
 
     def make_listview(self, data):
         header = self.make_header()
-        self.home_view = HomeView(data, header, self)
+        self.home_view = HomeView(data, header)
         return self.home_view
 
     def make_header(self):
@@ -180,8 +192,10 @@ class Terminal(object):
         delay_refresh(self.loop)
 
     def run_retrieve_home(self):
+        self.leetcode.is_login = auth.is_login()
         if not self.leetcode.is_login:
             self.leetcode.is_login = auth.login()
+
         if self.loading_view:
             self.loading_view.set_text('Loading')
         data = self.leetcode.hard_retrieve_home()
@@ -191,6 +205,7 @@ class Terminal(object):
             self.end_loading()
             toast = Toast('Request fail!', 10, self.current_view, self.loop)
             toast.show()
+            self.logger.error('get quiz list fail')
 
     def run_retrieve_detail(self, data):
         ret = self.leetcode.retrieve_detail(data)
@@ -198,6 +213,7 @@ class Terminal(object):
             title, body, code = ret
             self.retrieve_detail_done(title, body, code)
         else:
+            self.end_loading()
             toast = Toast('Request fail!', 10, self.current_view, self.loop)
             toast.show()
             self.logger.error('get detail %s fail', data.id)
@@ -243,6 +259,7 @@ class Terminal(object):
         except KeyboardInterrupt:
             sys.exit()
         finally:
+            self.logger.exception("Fatal error in main loop")
             self.logger.info("clear thread")
             self.clear_thread()
 

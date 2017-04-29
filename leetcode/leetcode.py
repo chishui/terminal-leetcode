@@ -5,7 +5,7 @@ import logging
 from bs4 import BeautifulSoup
 from .config import config
 from .model import QuizItem
-from .auth import session, is_login, headers, retrieve
+from .auth import session, headers, retrieve
 from .code import *
 
 BASE_URL = 'https://leetcode.com'
@@ -24,8 +24,7 @@ class Leetcode(object):
         self.items = []
         self.logger = logging.getLogger(__name__)
         config.load()
-        self.is_login = is_login()
-        self.logger.debug("is login: %s", self.is_login)
+        self.is_login = False
 
     def __getitem__(self, i):
         return self.items[i]
@@ -107,10 +106,9 @@ class Leetcode(object):
             body = content.text.replace(chr(13), '')
             body = re.sub('\n{3,}', '\n\n', body).strip()
             # get sample code
-            rawCode = bs.find("div", attrs={"ng-controller": "AceCtrl as aceCtrl"}).attrs["ng-init"]
             language = format_language_text(config.language)
             pattern = "\\'text\\':\s\\'%s\\',\s\\'defaultCode\\':\s\\'(.*?)\\'" % language
-            content = re.search(pattern, rawCode).group(1).\
+            content = re.search(pattern, bs.prettify()).group(1).\
                   encode("utf-8").decode("unicode-escape").\
                   replace("\r\n", "\n")
             return title, body, content

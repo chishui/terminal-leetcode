@@ -1,5 +1,5 @@
-from .terminal import Terminal
 from .log import init_logger
+from .terminal import Terminal
 
 def main():
     """Main entry point"""

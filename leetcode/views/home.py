@@ -44,8 +44,7 @@ class HomeView(urwid.Frame):
     '''
         Quiz List View
     '''
-    def __init__(self, data, header, terminal=None):
-        self.terminal = terminal
+    def __init__(self, data, header):
         title = [
             (4, urwid.AttrWrap(urwid.Text('#'), 'body', 'focus')),
             (2, urwid.AttrWrap(urwid.Text(''), 'body', 'focus')),
@@ -93,15 +92,6 @@ class HomeView(urwid.Frame):
             self.sort_list('acceptance')
         elif key is '4':
             self.sort_list('difficulty', cmp=self.difficulty_cmp)
-        elif key is 'R':
-            if self.terminal:
-                self.terminal.reload_list()
-        elif key in ('enter', 'right'):
-            if  self.listbox.get_focus()[0].selectable() and self.terminal:
-                self.terminal.enter_detail(self.listbox.get_focus()[0].data)
-        elif key is 'f':
-            if self.terminal:
-                self.terminal.enter_search()
         elif key is 'home':
             self.listbox.focus_position = 0
         elif key is 'end':
@@ -128,6 +118,12 @@ class HomeView(urwid.Frame):
                 if re.search('.*(%s).*' % text, item.data.title, re.I):
                     self.listbox.focus_position = i
                     break
+
+    def is_current_item_enterable(self):
+        return self.listbox.get_focus()[0].selectable()
+
+    def get_current_item_data(self):
+        return self.listbox.get_focus()[0].data
 
 
 def make_itemwidgets(data, marks):

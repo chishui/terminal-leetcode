@@ -6,11 +6,8 @@ import requests_mock
 import requests
 
 class TestLeetcode(unittest.TestCase):
-    @mock.patch('leetcode.leetcode.is_login')
-    def setUp(self, mock_isLogin):
-        mock_isLogin.return_value = True
+    def setUp(self):
         self.leet = Leetcode()
-
 
     def test_retrieve_home(self):
         data = {
@@ -114,9 +111,10 @@ class TestLeetcode(unittest.TestCase):
             self.assertEqual(b, 'content')
             self.assertEqual(c, 'code')
 
+    @mock.patch('leetcode.leetcode.os.makedirs')
     @mock.patch('leetcode.leetcode.get_code_for_submission')
     @mock.patch('leetcode.leetcode.os.path.exists')
-    def test_submit_code(self, mock_exists, mock_get_code):
+    def test_submit_code(self, mock_exists, mock_get_code, mock_makedirs):
         item = QuizItem({'id': 1,
                         'url': '/hello',
                         'title':'',
