@@ -19,6 +19,18 @@ def merge_two_dicts(x, y):
     z.update(y)
     return z
 
+LANG_MAPPING = {
+    'C++': 'cpp',
+    'Python': 'python',
+    'Java': 'java',
+    'C': 'c',
+    'C#': 'csharp',
+    'Javascript': 'javascript',
+    'Ruby': 'ruby',
+    'Swift': 'swift',
+    'Go': 'go',
+}
+
 class Leetcode(object):
     def __init__(self):
         self.items = []
@@ -124,7 +136,7 @@ class Leetcode(object):
         code = code.replace('\n', '\r\n')
         body = { 'question_id': item.id,
                 'test_mode': False,
-                'lang': 'cpp',
+                'lang': LANG_MAPPING.get(config.language, 'cpp'),
                 'judge_type': 'large',
                 'typed_code': code}
 
