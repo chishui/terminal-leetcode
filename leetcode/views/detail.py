@@ -83,7 +83,7 @@ class DetailView(urwid.Frame):
     def get_discussion_url(self):
         item_url = self.data.url.strip('/')
         name = item_url.split('/')[-1]
-        url = BASE_URL + '/discuss/questions/oj/' + name
+        url = '%s/problems/%s/#/solutions' % (BASE_URL, name)
         return url
 
 
