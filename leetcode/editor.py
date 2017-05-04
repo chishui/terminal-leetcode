@@ -25,7 +25,14 @@ def is_inside_tmux():
     return 'TMUX' in os.environ
 
 def open_in_new_tmux_window(edit_cmd):
-    #cmd = "tmux split-window -h '%s'" % edit_cmd
+    # close other panes if exist, so that the detail pane is the only pane
+    try:
+        output = subprocess.check_output("tmux list-panes | wc -l", shell=True)
+        num_pane = int(output)
+        if num_pane > 1:
+            subprocess.check_call("tmux kill-pane -a", shell=True)
+    except:
+        pass
     cmd = "tmux split-window -h"
     os.system(cmd)
     cmd = "tmux send-keys '%s' C-m" % edit_cmd
