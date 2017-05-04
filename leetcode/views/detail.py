@@ -63,6 +63,10 @@ class DetailView(urwid.Frame):
         elif key is 'd':
             url = self.get_discussion_url()
             webbrowser.open(url)
+        # open solutions page from default browser
+        elif key is 'S':
+            url = self.get_solutions_url()
+            webbrowser.open(url)
         else:
             return urwid.Frame.keypress(self, size, key)
 
@@ -85,6 +89,13 @@ class DetailView(urwid.Frame):
         name = item_url.split('/')[-1]
         url = BASE_URL + '/discuss/questions/oj/' + name
         return url
+
+    def get_solutions_url(self):
+        item_url = self.data.url.strip('/')
+        name = item_url.split('/')[-1]
+        url = '%s/problems/%s/#/solutions' % (BASE_URL, name)
+        return url
+
 
 
 @enhance_code
