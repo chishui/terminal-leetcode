@@ -157,7 +157,7 @@ after you finish the code, you can use ``make`` directly to compile your code.
 In quiz detail view, press ``n`` will always create a new sample code file.
 - Press ``t`` in quiz list view to add tag for quiz.
 - Press ``e`` in quiz detail view to open editor to edit code.
-- Press ``d`` in quiz detail view to open solutions page in web browser.
+- Press ``d`` in quiz detail view to open discussion page in web browser.
 - Press ``s`` in quiz detail view to submit your code.
 - Press ``1`` in quiz list view to sort quiz list by id.
 - Press ``2`` in quiz list view to sort quiz list by title.

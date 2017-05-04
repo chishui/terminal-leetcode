@@ -24,7 +24,7 @@ class HelpView(urwid.Frame):
                 'n'                         : search next quiz (quiz home view)
                 'e'                         : open editor to edit code
                 'n'                         : create a new file to edit sample code (quiz detail view)
-                'd'                         : open solutions in web browser
+                'd'                         : open discussion in web browser
                 's'                         : submit your code to leetcode (quiz detail view)
     '''
 
