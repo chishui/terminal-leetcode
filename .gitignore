@@ -5,4 +5,5 @@ Makefile
 *.pyc
 /.git
 .DS_Store
+/.virtualenv
 
