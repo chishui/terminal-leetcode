@@ -102,6 +102,12 @@ This feature could be turned on and off by config option in config.cfg as:
 ........
 tmux_support=true/false
 ```
+
+Note that when you press `e` in detail view,  all other panes in current tmux
+window except for the detail pane will be closed before the new edit pane is
+created, so that you can edit solution for another problem seamlessly without
+manually exiting vim and closing the edit pane.
+
 #### Code Snippet
 Two code snippets can be used when creating code file.  
 You can create files ``before`` and ``after`` in ``~/.config/leetcode/snippet``. Code snippet in ``before``
