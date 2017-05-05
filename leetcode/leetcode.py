@@ -4,7 +4,7 @@ import json
 import logging
 from bs4 import BeautifulSoup
 from .config import config
-from .model import QuizItem
+from .model import QuizItem, DetailData
 from .auth import session, headers, retrieve
 from .code import *
 
@@ -117,13 +117,20 @@ class Leetcode(object):
             title = bs.find('div', 'question-title').h3.text.strip()
             body = content.text.replace(chr(13), '')
             body = re.sub('\n{3,}', '\n\n', body).strip()
+            a = bs.find('section', {'class': 'action'})
+            discussion_url = None
+            for child in a:
+                if child.name is 'a' and child.text.strip() == 'Discuss':
+                    discussion_url = child['href']
+
             # get sample code
             language = format_language_text(config.language)
             pattern = "\\'text\\':\s\\'%s\\',\s\\'defaultCode\\':\s\\'(.*?)\\'" % language
             content = re.search(pattern, bs.prettify()).group(1).\
                   encode("utf-8").decode("unicode-escape").\
                   replace("\r\n", "\n")
-            return title, body, content
+            data = DetailData(title=title, body=body, code=content, discussion_url=discussion_url)
+            return data
         except AttributeError, e:
             self.logger.error(e)
             return None

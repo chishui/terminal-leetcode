@@ -2,7 +2,6 @@ import sys
 import time
 import logging
 from threading import Thread
-from collections import namedtuple
 import urwid
 from .leetcode import Leetcode
 from views.home import HomeView
@@ -12,6 +11,7 @@ from views.loading import *
 from views.viewhelper import *
 from .config import config
 import auth
+from .model import DetailData
 
 palette = [
     ('body', 'dark cyan', ''),
@@ -21,9 +21,6 @@ palette = [
     ('tag', 'white', 'light cyan', 'standout'),
     ('hometag', 'dark red', '')
     ]
-
-DetailData = namedtuple('DetailData', ['title', 'body', 'code', 'id', 'url'])
-
 
 class Terminal(object):
     def __init__(self):
@@ -183,10 +180,9 @@ class Terminal(object):
         self.end_loading()
         delay_refresh(self.loop)
 
-    def retrieve_detail_done(self, title, body, code):
-        quizid = self.home_view.listbox.get_focus()[0].data.id
-        url = self.home_view.listbox.get_focus()[0].data.url
-        data = DetailData(title, body, code, quizid, url)
+    def retrieve_detail_done(self, data):
+        data.quizid = self.home_view.listbox.get_focus()[0].data.id
+        data.url = self.home_view.listbox.get_focus()[0].data.url
         self.goto_view(self.make_detailview(data))
         self.end_loading()
         delay_refresh(self.loop)
@@ -210,8 +206,7 @@ class Terminal(object):
     def run_retrieve_detail(self, data):
         ret = self.leetcode.retrieve_detail(data)
         if ret:
-            title, body, code = ret
-            self.retrieve_detail_done(title, body, code)
+            self.retrieve_detail_done(ret)
         else:
             self.end_loading()
             toast = Toast('Request fail!', 10, self.current_view, self.loop)
