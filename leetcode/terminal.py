@@ -253,8 +253,9 @@ class Terminal(object):
             self.loop.run()
         except KeyboardInterrupt:
             sys.exit()
-        finally:
+        except:
             self.logger.exception("Fatal error in main loop")
+        finally:
             self.logger.info("clear thread")
             self.clear_thread()
 
