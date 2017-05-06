@@ -181,7 +181,7 @@ class Terminal(object):
         delay_refresh(self.loop)
 
     def retrieve_detail_done(self, data):
-        data.quizid = self.home_view.listbox.get_focus()[0].data.id
+        data.id = self.home_view.listbox.get_focus()[0].data.id
         data.url = self.home_view.listbox.get_focus()[0].data.url
         self.goto_view(self.make_detailview(data))
         self.end_loading()
