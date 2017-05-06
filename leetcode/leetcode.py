@@ -129,7 +129,9 @@ class Leetcode(object):
             content = re.search(pattern, bs.prettify()).group(1).\
                   encode("utf-8").decode("unicode-escape").\
                   replace("\r\n", "\n")
-            data = DetailData(title=title, body=body, code=content, discussion_url=discussion_url)
+            data = DetailData(title=title, body=body, code=content,
+                              id=item.id, url=item.url,
+                              discussion_url=discussion_url)
             return data
         except AttributeError, e:
             self.logger.error(e)
