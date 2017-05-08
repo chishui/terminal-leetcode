@@ -269,8 +269,13 @@ class Terminal(object):
                 code = r[0]
 
             self.end_loading()
-            result = r[1]
-            self.goto_view(self.make_result_view(result))
+            if code == 0:
+                result = r[1]
+                self.goto_view(self.make_result_view(result))
+            else:
+                toast = Toast('error: %s' % r[1])
+                toast.show()
+                self.logger.error('send data fail')
         else:
             self.end_loading()
             toast = Toast('error: %s' % text_or_id, 10 + len(text_or_id), self.current_view, self.loop)

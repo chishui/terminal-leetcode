@@ -183,13 +183,7 @@ class Leetcode(object):
             elif data['state'] == 'STARTED':
                 return (2,)
             elif data['state'] == 'SUCCESS':
-                if 'run_success' in data:
-                    if data['run_success']:
-                        return (0, data)
-                    else:
-                        return (-1, data)
-                else:
-                    raise KeyError
+                return (0, data)
         except KeyError:
             return (-1, 'Unknow error')
 
