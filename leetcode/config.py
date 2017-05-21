@@ -25,7 +25,7 @@ class Config(object):
         self.username = None
         self.password = None
         self.language = 'C++'
-        self.ext = None
+        self.ext = ''
         self.path = None
         self.keep_quiz_detail = False
         self.tmux_support = False
