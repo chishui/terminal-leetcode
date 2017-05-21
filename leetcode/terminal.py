@@ -22,6 +22,11 @@ palette = [
     ('hometag', 'dark red', '')
     ]
 
+STATUS_ACCEPTED = 10
+STATUS_WRONG_ANSWER = 11
+STATUS_RUNTIME_ERROR = 15
+STATUS_COMPILATION_ERROR = 20
+
 class Terminal(object):
     def __init__(self):
         self.home_view = None
@@ -33,6 +38,7 @@ class Terminal(object):
         self.view_stack = []
         self.detail_view = None
         self.search_view = None
+        self.result_view = None
         self.loading_view = None
         self.logger = logging.getLogger(__name__)
 
@@ -53,6 +59,12 @@ class Terminal(object):
         self.loop.widget = self.current_view
 
     def keystroke(self, key):
+        # on result view, return to previous view if not scrolling
+        if self.result_view and self.current_view == self.result_view:
+            key = vim_key_map(key)
+            if key not in ['up', 'down', 'left']:
+                self.go_back()
+
         if self.quit_confirm_view and self.current_view == self.quit_confirm_view:
             if key is 'y':
                 raise urwid.ExitMainLoop()
@@ -140,6 +152,40 @@ class Terminal(object):
         self.detail_view = DetailView(data, self.leetcode, self.loop)
         return self.detail_view
 
+    def make_result_view(self, result):
+        msg = ['=================']
+        msg.append('Submission Result')
+        msg.append('=================')
+
+        if result['status_code'] == STATUS_ACCEPTED:
+            msg.append('Result: Accepted')
+            msg.append('Runtime: %s' % (result['status_runtime']))
+            msg.append('Testcase: %d / %d' % (result['total_correct'],
+                                              result['total_testcases']))
+        elif result['status_code'] == STATUS_RUNTIME_ERROR:
+            msg.append('Result: Runtime Error')
+            msg.append('Error msg: %s' % (result['runtime_error']))
+            msg.append('Last testcase: %s' % (result.get('last_testcase', '')))
+        elif result['status_code'] == STATUS_WRONG_ANSWER:
+            msg.append('Result: Wrong Answer')
+            msg.append('Testcase: %d / %d' % (result['total_correct'],
+                                              result['total_testcases']))
+            msg.append('Input: %s' % (result['input']))
+            msg.append('Output: %s' % (result['code_output']))
+            msg.append('Expected: %s' % (result['expected_output']))
+            if result.get('std_output', '') != '':
+                msg.append('Stdout: %s' % (result['std_output']))
+        elif result['status_code'] == STATUS_COMPILATION_ERROR:
+            msg.append('Result: Compile Error')
+            msg.append('Error: %s' % (result.get('compile_error', '')))
+        else:
+            msg.append('Status unknown: %d' % (result['status_code']))
+
+        text = urwid.AttrMap(urwid.Text('\n'.join(msg)), 'body')
+        self.result_view = urwid.Overlay(text, self.current_view, 'left',
+                                         ('relative', 100), 'bottom', None)
+        return self.result_view
+
     def make_listview(self, data):
         header = self.make_header()
         self.home_view = HomeView(data, header)
@@ -223,16 +269,13 @@ class Terminal(object):
                 code = r[0]
 
             self.end_loading()
-            if code < 0:
-                toast = Toast('error: %s' % r[1], 10 + len(r[1]), self.current_view, self.loop)
+            if code == 0:
+                result = r[1]
+                self.goto_view(self.make_result_view(result))
             else:
-                runtime = r[3]
-                if runtime == 'N/A':
-                    toast = Toast('faied test: %d/%d' % (r[1], r[2]), 20, self.current_view, self.loop)
-                else:
-                    toast = Toast('success, time: %s' % r[3], 20, self.current_view, self.loop)
-            toast.show()
-            delay_refresh(self.loop)
+                toast = Toast('error: %s' % r[1])
+                toast.show()
+                self.logger.error('send data fail')
         else:
             self.end_loading()
             toast = Toast('error: %s' % text_or_id, 10 + len(text_or_id), self.current_view, self.loop)
