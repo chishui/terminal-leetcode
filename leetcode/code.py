@@ -59,12 +59,14 @@ def unique_file_name(filepath):
     return filepath
 
 def get_code_file_path(quiz_id):
-    if not config.path:
-        return
-    if not os.path.exists(config.path):
-        os.makedirs(config.path)
+    path = config.path
+    if not path:
+        path = '~/leetcode'
 
-    return os.path.join(config.path, str(quiz_id) + '.' + config.ext)
+    if not os.path.exists(path):
+        os.makedirs(path)
+
+    return os.path.join(path, str(quiz_id) + '.' + config.ext)
 
 def get_code_for_submission(filepath):
     data = get_data(filepath)

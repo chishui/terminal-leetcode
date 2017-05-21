@@ -18,3 +18,10 @@ class TestCode(unittest.TestCase):
         mock_exists.side_effect = [True, True, False]
         self.assertEqual(unique_file_name('hello.'), 'hello-1.')
 
+    @mock.patch('leetcode.code.config')
+    @mock.patch('leetcode.code.os.makedirs')
+    def test_get_code_file_path(self, mock_makedirs, mock_config):
+        mock_config.path = ''
+        mock_config.ext = 'py'
+        self.assertEqual(get_code_file_path(1), '~/leetcode/1.py')
+        mock_makedirs.assert_called_once()

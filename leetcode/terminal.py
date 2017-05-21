@@ -252,11 +252,12 @@ class Terminal(object):
         try:
             self.loop.run()
         except KeyboardInterrupt:
-            sys.exit()
-        finally:
+            self.logger.info('Keyboard interrupt')
+        except Exception,e:
             self.logger.exception("Fatal error in main loop")
-            self.logger.info("clear thread")
+        finally:
             self.clear_thread()
+            sys.exit()
 
     def clear_thread(self):
         if self.loading_view:
