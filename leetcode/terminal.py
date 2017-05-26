@@ -228,7 +228,7 @@ class Terminal(object):
             else:
                 runtime = r[3]
                 if runtime == 'N/A':
-                    toast = Toast('faied test: %d/%d' % (r[1], r[2]), 20, self.current_view, self.loop)
+                    toast = Toast('failed test: %d/%d' % (r[1], r[2]), 20, self.current_view, self.loop)
                 else:
                     toast = Toast('success, time: %s' % r[3], 20, self.current_view, self.loop)
             toast.show()
