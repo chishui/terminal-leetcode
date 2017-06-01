@@ -185,13 +185,13 @@ class Leetcode(object):
             elif data['state'] == 'SUCCESS':
                 if 'run_success' in data:
                     if data['run_success']:
-                        return (0, data['total_correct'], data['total_testcases'], data['status_runtime'])
+                        return (0, data)#data['total_correct'], data['total_testcases'], data['status_runtime'])
                     else:
-                        return (-1, data['compile_error'])
+                        return (-1, data)#data['compile_error'])
                 else:
                     raise KeyError
         except KeyError:
-            return (-1, 'Unknow error')
+            return (-2, 'Unknow error')
 
 
 def preprocess_bs(bs):

@@ -163,11 +163,11 @@ class TestLeetcode(unittest.TestCase):
             m.get(url, json={ 'state': 'STARTED' })
             self.assertEqual(self.leet.check_submission_result(1)[0], 2)
             m.get(url, json={ 'state': 'SUCCESS' })
-            self.assertEqual(self.leet.check_submission_result(1)[0], -1)
+            self.assertEqual(self.leet.check_submission_result(1)[0], -2)
             m.get(url, json={ 'state': 'SUCCESS', 'run_success': False})
             self.assertEqual(self.leet.check_submission_result(1)[0], -1)
             m.get(url, json={ 'state': 'SUCCESS', 'run_success': True})
-            self.assertEqual(self.leet.check_submission_result(1)[0], -1)
+            self.assertEqual(self.leet.check_submission_result(1)[0], 0)
             m.get(url, json={ 'state': 'SUCCESS', 'run_success': True, 'total_correct':0, 'total_testcases': 0, 'status_runtime': 0})
             self.assertEqual(self.leet.check_submission_result(1)[0], 0)
 

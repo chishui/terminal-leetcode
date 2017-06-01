@@ -9,6 +9,7 @@ from views.detail import DetailView
 from views.help import HelpView
 from views.loading import *
 from views.viewhelper import *
+from views.result import ResultView
 from .config import config
 import auth
 from .model import DetailData
@@ -19,7 +20,8 @@ palette = [
     ('head', 'white', 'dark gray'),
     ('lock', 'dark gray', ''),
     ('tag', 'white', 'light cyan', 'standout'),
-    ('hometag', 'dark red', '')
+    ('hometag', 'dark red', ''),
+    ('accepted', 'dark green', '')
     ]
 
 class Terminal(object):
@@ -223,15 +225,16 @@ class Terminal(object):
                 code = r[0]
 
             self.end_loading()
-            if code < 0:
+            if code < -1:
                 toast = Toast('error: %s' % r[1], 10 + len(r[1]), self.current_view, self.loop)
+                toast.show()
             else:
-                runtime = r[3]
-                if runtime == 'N/A':
-                    toast = Toast('failed test: %d/%d' % (r[1], r[2]), 20, self.current_view, self.loop)
-                else:
-                    toast = Toast('success, time: %s' % r[3], 20, self.current_view, self.loop)
-            toast.show()
+                try:
+                    result = ResultView(data, self.detail_view, r[1], loop=self.loop)
+                    result.show()
+                except ValueError as e:
+                    toast = Toast('error: %s' % e)
+                    toast.show()
             delay_refresh(self.loop)
         else:
             self.end_loading()
