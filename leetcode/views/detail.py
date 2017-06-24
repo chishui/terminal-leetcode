@@ -34,18 +34,13 @@ class DetailView(urwid.Frame):
         tags = False
         text_widgets = []
         for line in self.data.body.split('\n'):
-            if line == '' and tags:
-                newline = newline + 1
-                if newline >= 2:
-                    tags = False
-            else:
-                if re.search('Show Tags', line):
-                    newline = 0
-                    tags = True
-                elif tags:
-                    text_widgets.append(urwid.Text(('tag', line)))
-                    continue
             text_widgets.append(urwid.Text(line))
+
+        text_widgets.append(urwid.Divider())
+
+        for tag in self.data.tags:
+            text_widgets.append(urwid.Text(('tag', tag)))
+
         return text_widgets
 
     def keypress(self, size, key):

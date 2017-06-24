@@ -112,12 +112,17 @@ class Leetcode(object):
             r = retrieve(BASE_URL + item.url)
 
         try:
-            content = bs.find('div', 'question-content')
-            preprocess_bs(content)
+            content = bs.find('div', 'question-description')
             title = bs.find('div', 'question-title').h3.text.strip()
             body = content.text.replace(chr(13), '')
             body = re.sub('\n{3,}', '\n\n', body).strip()
             a = bs.find('section', {'class': 'action'})
+            tag = bs.find('div', {'id': 'tags-topics'})
+            tagas = tag.find_all('a')
+            tags = []
+            for taga in tagas:
+                tags.append(taga.text)
+
             discussion_url = None
             for child in a:
                 if child.name is 'a' and child.text.strip() == 'Discuss':
@@ -129,7 +134,7 @@ class Leetcode(object):
             content = re.search(pattern, bs.prettify()).group(1).\
                   encode("utf-8").decode("unicode-escape").\
                   replace("\r\n", "\n")
-            data = DetailData(title=title, body=body, code=content, discussion_url=discussion_url)
+            data = DetailData(title=title, body=body, code=content, discussion_url=discussion_url, tags=tags)
             return data
         except AttributeError, e:
             self.logger.error(e)

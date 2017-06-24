@@ -24,11 +24,12 @@ class EasyLock(object):
         self.lock.release()
 
 class DetailData(object):
-    def __init__(self, title=None, body=None, code=None, id=None, url=None, discussion_url=None):
+    def __init__(self, title=None, body=None, code=None, id=None, url=None, discussion_url=None, tags=None):
         self.title = title
         self.body = body
         self.code = code
         self.id = id
         self.url = url
         self.discussion_url = discussion_url
+        self.tags = tags
 
