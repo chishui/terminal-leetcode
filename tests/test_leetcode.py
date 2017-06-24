@@ -79,7 +79,7 @@ class TestLeetcode(unittest.TestCase):
         data = ' <html> <head> </head> <body> </body> </html> '
         data2 = ' <html> <head> </head> <body><div class=question-content>hello</div> </body> </html> '
         data3 = ''' <html> <head> </head> <body>
-        <div class=question-content>content</div>
+        <div class=question-description>content</div>
         <div class=question-title>
             <h3>title</h3>
         </div>
@@ -102,6 +102,12 @@ class TestLeetcode(unittest.TestCase):
         <div ng-controller="AceCtrl as aceCtrl" ng-init="aceCtrl.init(
         [{'value': 'cpp', 'text': 'C++', 'defaultCode': 'code'}])">
         </div>
+
+<div id="tags-topics" class="hideout">
+                    <a class="btn btn-xs btn-default btn-round text-sm" href="/tag/array/">Array</a>
+                    <a class="btn btn-xs btn-default btn-round text-sm" href="/tag/hash-table/">Hash Table</a>
+                  <br>
+                </div>
         </body> </html> '''
         item = QuizItem({'id': 1,
                         'url': '/hello',
