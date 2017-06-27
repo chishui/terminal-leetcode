@@ -4,4 +4,4 @@ python:
 install:
   - pip install bs4 requests urwid pytest requests_mock lxml
 script:
-    py.test -v
+  - py.test -v

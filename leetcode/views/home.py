@@ -14,14 +14,14 @@ class ItemWidget(urwid.WidgetWrap):
         self.sel = sel
         self.id = data.id
         self.data = data
-        lockbody = 'body' if not self.data.lock else 'lock'
+        lockbody = 'body' if not self.data.locked else 'lock'
         pass_symbol = u''
-        if data.pass_status == 'ac':
+        if self.data.submission_status == 'ac':
             pass_symbol = u'\u2714'
-        elif data.pass_status == 'notac':
+        elif self.data.submission_status == 'notac':
             pass_symbol = u'\u2718'
-        text = str(data.id)
-        mark = make_mark(marks, data.id)
+        text = str(self.data.id)
+        mark = make_mark(marks, self.data.id)
         self.item = [
             (4, urwid.AttrWrap(urwid.Text(text), lockbody, 'focus')),
             (2, urwid.AttrWrap(urwid.Text(pass_symbol), lockbody, 'focus')),
@@ -34,7 +34,7 @@ class ItemWidget(urwid.WidgetWrap):
         urwid.WidgetWrap.__init__(self, w)
 
     def selectable(self):
-        return self.sel and not self.data.lock
+        return self.sel and not self.data.locked
 
     def keypress(self, size, key):
         return key
@@ -128,8 +128,8 @@ class HomeView(urwid.Frame):
 
 def make_itemwidgets(data, marks):
     items = []
-    for item in data:
-        items.append(ItemWidget(item, marks=marks))
+    for quiz in data:
+        items.append(ItemWidget(quiz, marks=marks))
     return items
 
 def is_string_an_integer(s):

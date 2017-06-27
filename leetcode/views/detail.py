@@ -14,16 +14,15 @@ class DetailView(urwid.Frame):
     '''
         Quiz Item Detail View
     '''
-    def __init__(self, data, leetcode, loop = None):
-        self.data = data
+    def __init__(self, quiz, loop = None):
+        self.quiz = quiz
         self.loop = loop
         self.logger = logging.getLogger(__name__)
-        self.leetcode = leetcode
         blank = urwid.Divider()
-        view_title = urwid.AttrWrap(urwid.Text(self.data.title), 'body')
+        view_title = urwid.AttrWrap(urwid.Text(self.quiz.title), 'body')
         view_text = self.make_body_widgets()
         view_code_title = urwid.Text('\n --- Sample Code ---\n')
-        view_code = urwid.Text(self.data.code)
+        view_code = urwid.Text(self.quiz.sample_code)
         listitems = [blank, view_title, blank] + view_text + \
                     [blank, view_code_title, blank, view_code, blank]
         self.listbox = urwid.ListBox(urwid.SimpleListWalker(listitems))
@@ -33,12 +32,13 @@ class DetailView(urwid.Frame):
         newline = 0
         tags = False
         text_widgets = []
-        for line in self.data.body.split('\n'):
+
+        for line in self.quiz.content.split('\n'):
             text_widgets.append(urwid.Text(line))
 
         text_widgets.append(urwid.Divider())
 
-        for tag in self.data.tags:
+        for tag in self.quiz.tags:
             text_widgets.append(urwid.Text(('tag', tag)))
 
         return text_widgets
@@ -66,11 +66,11 @@ class DetailView(urwid.Frame):
             return urwid.Frame.keypress(self, size, key)
 
     def edit_code(self, newcode=False):
-        filepath = get_code_file_path(self.data.id)
+        filepath = get_code_file_path(self.quiz.id)
         if newcode:
             filepath = unique_file_name(filepath)
 
-        code = prepare_code(self.data.code, config.language, filepath)
+        code = prepare_code(self.quiz.sample_code, config.language, filepath)
         if not os.path.exists(filepath):
             with open(filepath, 'w') as f:
                 #if config.keep_quiz_detail:
@@ -80,13 +80,13 @@ class DetailView(urwid.Frame):
         edit(filepath, self.loop)
 
     def get_discussion_url(self):
-        item_url = self.data.url.strip('/')
+        item_url = self.quiz.url.strip('/')
         name = item_url.split('/')[-1]
-        url = self.data.discussion_url + '/' + name
+        url = self.quiz.discussion_url + '/' + name
         return url
 
     def get_solutions_url(self):
-        item_url = self.data.url.strip('/')
+        item_url = self.quiz.url.strip('/')
         name = item_url.split('/')[-1]
         url = '%s/problems/%s/#/solutions' % (BASE_URL, name)
         return url

@@ -3,7 +3,7 @@ import time
 import logging
 from threading import Thread
 import urwid
-from .leetcode import Leetcode
+from .leetcode import Leetcode, Quiz
 from views.home import HomeView
 from views.detail import DetailView
 from views.help import HelpView
@@ -12,7 +12,7 @@ from views.viewhelper import *
 from views.result import ResultView
 from .config import config
 import auth
-from .model import DetailData
+from .code import *
 
 palette = [
     ('body', 'dark cyan', ''),
@@ -64,7 +64,7 @@ class Terminal(object):
         elif self.submit_confirm_view and self.current_view == self.submit_confirm_view:
             self.go_back()
             if key is 'y':
-                self.send_code(self.detail_view.data)
+                self.send_code(self.detail_view.quiz)
 
         elif self.current_view == self.search_view:
             if key is 'enter':
@@ -114,9 +114,9 @@ class Terminal(object):
 
     def reload_list(self):
         '''Press R in home view to retrieve quiz list'''
-        items = self.leetcode.hard_retrieve_home()
-        if items:
-            self.home_view = self.make_listview(items)
+        self.leetcode.load()
+        if self.leetcode.quizzes and len(self.leetcode.quizzes) > 0:
+            self.home_view = self.make_listview(self.leetcode.quizzes)
             self.view_stack = []
             self.goto_view(self.home_view)
 
@@ -139,7 +139,7 @@ class Terminal(object):
         return self.search_view
 
     def make_detailview(self, data):
-        self.detail_view = DetailView(data, self.leetcode, self.loop)
+        self.detail_view = DetailView(data, self.loop)
         return self.detail_view
 
     def make_listview(self, data):
@@ -154,7 +154,7 @@ class Terminal(object):
                     urwid.Text('%s' % config.username),
                     'head', ''))),
                 urwid.AttrWrap(urwid.Text('You have solved %d / %d problems. ' %
-                    (len(self.leetcode.solved), len(self.leetcode.items))), 'head', ''),
+                    (len(self.leetcode.solved), len(self.leetcode.quizzes))), 'head', ''),
             ]
             return urwid.Columns(columns)
         else:
@@ -175,8 +175,8 @@ class Terminal(object):
             self.loading_view.end()
             self.loading_view = None
 
-    def retrieve_home_done(self, data):
-        self.home_view = self.make_listview(data)
+    def retrieve_home_done(self, quizzes):
+        self.home_view = self.make_listview(quizzes)
         self.view_stack = []
         self.goto_view(self.home_view)
         self.end_loading()
@@ -196,32 +196,38 @@ class Terminal(object):
 
         if self.loading_view:
             self.loading_view.set_text('Loading')
-        data = self.leetcode.hard_retrieve_home()
-        if data:
-            self.retrieve_home_done(data)
+
+        self.leetcode.load()
+        if self.leetcode.quizzes and len(self.leetcode.quizzes) > 0:
+            self.retrieve_home_done(self.leetcode.quizzes)
         else:
             self.end_loading()
             toast = Toast('Request fail!', 10, self.current_view, self.loop)
             toast.show()
             self.logger.error('get quiz list fail')
 
-    def run_retrieve_detail(self, data):
-        ret = self.leetcode.retrieve_detail(data)
+    def run_retrieve_detail(self, quiz):
+        ret = quiz.load()
         if ret:
-            self.retrieve_detail_done(ret)
+            self.retrieve_detail_done(quiz)
         else:
             self.end_loading()
             toast = Toast('Request fail!', 10, self.current_view, self.loop)
             toast.show()
-            self.logger.error('get detail %s fail', data.id)
+            self.logger.error('get detail %s fail', quiz.id)
 
-    def run_send_code(self, data):
-        success, text_or_id = self.leetcode.submit_code(data)
+    def run_send_code(self, quiz):
+        filepath = get_code_file_path(quiz.id)
+        if not os.path.exists(filepath):
+            return
+        code = get_code_for_submission(filepath)
+        code = code.replace('\n', '\r\n')
+        success, text_or_id = quiz.submit(code)
         if success:
             self.loading_view.set_text('Retrieving')
             code = 1
             while code > 0:
-                r = self.leetcode.check_submission_result(text_or_id)
+                r = quiz.check_submission_result(text_or_id)
                 code = r[0]
 
             self.end_loading()
@@ -230,7 +236,7 @@ class Terminal(object):
                 toast.show()
             else:
                 try:
-                    result = ResultView(data, self.detail_view, r[1], loop=self.loop)
+                    result = ResultView(quiz, self.detail_view, r[1], loop=self.loop)
                     result.show()
                 except ValueError as e:
                     toast = Toast('error: %s' % e)
