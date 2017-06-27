@@ -2,9 +2,16 @@ Terminal-Leetcode
 ============================
 Terminal-Leetcode is a terminal based leetcode website viewer.  
 This project is inspired by [RTV](https://github.com/michael-lazar/rtv).
-
 ![alt text](screenshots/list.gif "quiz list" )
 <!--![alt text](screenshots/detail.png "quiz detail")-->
+
+> I am learning React Native recently, to practice my new knowledges and based on the techniques of this project,  
+> I created an iOS app called *Leetcode client*. I know there already have been several similar apps,  
+> but I tried to make this app to bring you the most similar experience with navigating Leetcode's website.  
+> And I'm thinking to opensource this app if someone is interested in that. Thanks and enjoy!
+
+[![alt text](screenshots/Download_on_the_App_Store_Badge_US-UK_135x40.svg "Leetcode Client")]( https://itunes.apple.com/us/app/leetcode-client/id1252803664 )
+
 ---------------
 
 [![Build Status](https://travis-ci.org/chishui/terminal-leetcode.svg?branch=master)](https://travis-ci.org/chishui/terminal-leetcode)
@@ -173,7 +180,7 @@ In quiz detail view, press ``n`` will always create a new sample code file.
 Vim's moving keys ``h``, ``j``, ``k``, ``l``, ``ctrl+f``, ``ctrl+b`` are supported.
 
 # TODO
-- Test
+- ~~Test~~
 - ~~Submit code~~
 - ~~User login~~
 - ~~Quiz list sort~~
