@@ -1,7 +1,8 @@
 Terminal-Leetcode
 ============================
 Terminal-Leetcode is a terminal based leetcode website viewer.  
-This project is inspired by [RTV](https://github.com/michael-lazar/rtv).
+This project is inspired by [RTV](https://github.com/michael-lazar/rtv).  
+
 ![alt text](screenshots/list.gif "quiz list" )
 <!--![alt text](screenshots/detail.png "quiz detail")-->
 
@@ -10,7 +11,11 @@ This project is inspired by [RTV](https://github.com/michael-lazar/rtv).
 > but I tried to make this app to bring you the most similar experience with navigating Leetcode's website.  
 > And I'm thinking to opensource this app if someone is interested in that. Thanks and enjoy!
 
-[![alt text](screenshots/Download_on_the_App_Store_Badge_US-UK_135x40.svg "Leetcode Client")]( https://itunes.apple.com/us/app/leetcode-client/id1252803664 )
+<a href="https://itunes.apple.com/us/app/leetcode-client/id1252803664">
+  <img alt="Get it on iOS"
+       src="screenshots/Download_on_the_App_Store_Badge_US-UK_135x40.svg" height="60" />
+</a>
+
 
 ---------------
 
