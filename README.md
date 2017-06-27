@@ -11,10 +11,10 @@ This project is inspired by [RTV](https://github.com/michael-lazar/rtv).
 > but I tried to make this app to bring you the most similar experience with navigating Leetcode's website.  
 > And I'm thinking to opensource this app if someone is interested in that. Thanks and enjoy!
 
-<a href="https://itunes.apple.com/us/app/leetcode-client/id1252803664">
-  <img alt="Get it on iOS"
-       src="screenshots/Download_on_the_App_Store_Badge_US-UK_135x40.svg" height="60" />
-</a>
+[![Download in App Store][3]][2]
+
+[2]: https://itunes.apple.com/us/app/leetcode-client/id1252803664
+[3]: http://i.imgur.com/oRdf2WM.png
 
 
 ---------------
