@@ -11,7 +11,8 @@ This project is inspired by [RTV](https://github.com/michael-lazar/rtv).
 > but I tried to make this app to bring you the most similar experience with navigating Leetcode's website.  
 > And I'm thinking to opensource this app if someone is interested in that. Thanks and enjoy!
 
-[![Download in App Store][3]][2]
+&nbsp;&nbsp;[![Download in App Store][3]][2]  
+<a style="marginLeft: -10" href='https://play.google.com/store/apps/details?id=com.leetcode&hl=en&pcampaignid=MKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'><img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png' height="60"/></a>
 
 [2]: https://itunes.apple.com/us/app/leetcode-client/id1252803664
 [3]: http://i.imgur.com/oRdf2WM.png
