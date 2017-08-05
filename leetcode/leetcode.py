@@ -65,7 +65,7 @@ class Quiz(object):
             self.title = bs.find('div', 'question-title').h3.text.strip()
             self.content = content.text.replace(chr(13), '')
             self.content = re.sub('\n{3,}', '\n\n', self.content).strip()
-            a = bs.find('section', {'class': 'action'})
+            a = bs.find('section', {'class': 'action-btn-set'})
 
             self.tags = []
             tag = bs.find('div', {'id': 'tags-topics'})

@@ -83,7 +83,7 @@ class TestLeetcode(unittest.TestCase):
         <div class=question-title>
             <h3>title</h3>
         </div>
-<section class="action col-md-12">
+<section class="action-btn-set col-md-12">
     <a href="https://discuss.leetcode.com/category/9" target="_blank" onclick="ga('send', 'event', 'discuss', 'click', 'two-sum');" class="icon-btn">
       <i class="fa fa-commenting-o" aria-hidden="true"></i>Discuss
     </a>
