@@ -239,7 +239,7 @@ class Terminal(object):
                     result = ResultView(quiz, self.detail_view, r[1], loop=self.loop)
                     result.show()
                 except ValueError as e:
-                    toast = Toast('error: %s' % e)
+                    toast = Toast('error: %s' % e, 10 + len(str(e)), self.current_view, self.loop)
                     toast.show()
             delay_refresh(self.loop)
         else:
