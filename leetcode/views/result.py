@@ -23,6 +23,8 @@ class ResultView(urwid.Frame):
                 self.listbox = self.make_failed_view()
             elif result['status_code'] is 10:
                 self.listbox = self.make_success_view()
+            elif result['status_code'] is 14:
+                self.listbox = self.make_timeout_view()
             elif result['status_code'] is 15:
                 self.listbox = self.make_runtime_error_view()
             else:
@@ -111,12 +113,34 @@ class ResultView(urwid.Frame):
         columns = urwid.Columns([(17, status_header), (20, status)])
         column_wrap = urwid.WidgetWrap(columns)
         result_header = urwid.Text('--- Run Code Result: ---', align='center')
-        your_input_header = urwid.Text('Your input:')
-        your_input = urwid.Text('')
-        your_answer_header = urwid.Text('Your answer:')
+        your_input_header = urwid.Text('Last input:')
+        your_input = urwid.Text(self.result['last_testcase'])
+        your_answer_header = urwid.Text('Error:')
         your_answer = urwid.Text(self.result['runtime_error'])
-        expected_answer_header = urwid.Text('Expected answer:')
-        expected_answer = urwid.Text('Unkown Error')
+        expected_answer_header = urwid.Text('')
+        expected_answer = urwid.Text('')
+        list_items = [
+                result_header,
+                blank, column_wrap,
+                blank, your_input_header, your_input,
+                blank, your_answer_header, your_answer,
+                blank, expected_answer_header, expected_answer
+        ]
+        return urwid.Padding(urwid.ListBox(urwid.SimpleListWalker(list_items)), left=2, right=2)
+
+    def make_timeout_view(self):
+        blank = urwid.Divider()
+        status_header = urwid.AttrWrap(urwid.Text('Run Code Status: '), 'body')
+        status = urwid.AttrWrap(urwid.Text('Time Limit Exceeded'), 'hometag')
+        columns = urwid.Columns([(17, status_header), (20, status)])
+        column_wrap = urwid.WidgetWrap(columns)
+        result_header = urwid.Text('--- Run Code Result: ---', align='center')
+        your_input_header = urwid.Text('Last executed input:')
+        your_input = urwid.Text(self.result['last_testcase'])
+        your_answer_header = urwid.Text('')
+        your_answer = urwid.Text('')
+        expected_answer_header = urwid.Text('')
+        expected_answer = urwid.Text('')
         list_items = [
                 result_header,
                 blank, column_wrap,
