@@ -82,6 +82,10 @@ class ResultView(urwid.Frame):
                 blank, your_answer_header, your_answer,
                 blank, expected_answer_header, expected_answer
         ]
+        if len(self.result.get('std_output', '')) > 0:
+            stdout_header = urwid.Text('Stdout:')
+            stdout = urwid.Text(self.result['std_output'])
+            list_items.extend([blank, stdout_header, stdout])
         return urwid.Padding(urwid.ListBox(urwid.SimpleListWalker(list_items)), left=2, right=2)
 
     def make_compile_error_view(self):
