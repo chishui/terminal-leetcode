@@ -113,18 +113,15 @@ class ResultView(urwid.Frame):
         columns = urwid.Columns([(17, status_header), (20, status)])
         column_wrap = urwid.WidgetWrap(columns)
         result_header = urwid.Text('--- Run Code Result: ---', align='center')
+        error_header = urwid.Text('Runtime Error Message:')
+        error_message = urwid.Text(self.result['runtime_error'])
         your_input_header = urwid.Text('Last input:')
         your_input = urwid.Text(self.result['last_testcase'])
-        your_answer_header = urwid.Text('Error:')
-        your_answer = urwid.Text(self.result['runtime_error'])
-        expected_answer_header = urwid.Text('')
-        expected_answer = urwid.Text('')
         list_items = [
                 result_header,
                 blank, column_wrap,
+                blank, error_header, error_message,
                 blank, your_input_header, your_input,
-                blank, your_answer_header, your_answer,
-                blank, expected_answer_header, expected_answer
         ]
         return urwid.Padding(urwid.ListBox(urwid.SimpleListWalker(list_items)), left=2, right=2)
 
@@ -137,16 +134,10 @@ class ResultView(urwid.Frame):
         result_header = urwid.Text('--- Run Code Result: ---', align='center')
         your_input_header = urwid.Text('Last executed input:')
         your_input = urwid.Text(self.result['last_testcase'])
-        your_answer_header = urwid.Text('')
-        your_answer = urwid.Text('')
-        expected_answer_header = urwid.Text('')
-        expected_answer = urwid.Text('')
         list_items = [
                 result_header,
                 blank, column_wrap,
                 blank, your_input_header, your_input,
-                blank, your_answer_header, your_answer,
-                blank, expected_answer_header, expected_answer
         ]
         return urwid.Padding(urwid.ListBox(urwid.SimpleListWalker(list_items)), left=2, right=2)
 
