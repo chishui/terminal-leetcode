@@ -23,6 +23,10 @@ class ResultView(urwid.Frame):
                 self.listbox = self.make_failed_view()
             elif result['status_code'] is 10:
                 self.listbox = self.make_success_view()
+            elif result['status_code'] is 14:
+                self.listbox = self.make_timeout_view()
+            elif result['status_code'] is 15:
+                self.listbox = self.make_runtime_error_view()
             else:
                 raise ValueError('Unknow status code: %d' % result['status_code'])
         else:
@@ -101,6 +105,42 @@ class ResultView(urwid.Frame):
                 blank, expected_answer_header, expected_answer
         ]
         return urwid.Padding(urwid.ListBox(urwid.SimpleListWalker(list_items)), left=2, right=2)
+
+    def make_runtime_error_view(self):
+        blank = urwid.Divider()
+        status_header = urwid.AttrWrap(urwid.Text('Run Code Status: '), 'body')
+        status = urwid.AttrWrap(urwid.Text('Runtime Error'), 'hometag')
+        columns = urwid.Columns([(17, status_header), (20, status)])
+        column_wrap = urwid.WidgetWrap(columns)
+        result_header = urwid.Text('--- Run Code Result: ---', align='center')
+        error_header = urwid.Text('Runtime Error Message:')
+        error_message = urwid.Text(self.result['runtime_error'])
+        your_input_header = urwid.Text('Last input:')
+        your_input = urwid.Text(self.result['last_testcase'])
+        list_items = [
+                result_header,
+                blank, column_wrap,
+                blank, error_header, error_message,
+                blank, your_input_header, your_input,
+        ]
+        return urwid.Padding(urwid.ListBox(urwid.SimpleListWalker(list_items)), left=2, right=2)
+
+    def make_timeout_view(self):
+        blank = urwid.Divider()
+        status_header = urwid.AttrWrap(urwid.Text('Run Code Status: '), 'body')
+        status = urwid.AttrWrap(urwid.Text('Time Limit Exceeded'), 'hometag')
+        columns = urwid.Columns([(17, status_header), (20, status)])
+        column_wrap = urwid.WidgetWrap(columns)
+        result_header = urwid.Text('--- Run Code Result: ---', align='center')
+        your_input_header = urwid.Text('Last executed input:')
+        your_input = urwid.Text(self.result['last_testcase'])
+        list_items = [
+                result_header,
+                blank, column_wrap,
+                blank, your_input_header, your_input,
+        ]
+        return urwid.Padding(urwid.ListBox(urwid.SimpleListWalker(list_items)), left=2, right=2)
+
 
     def keypress(self, size, key):
         key = vim_key_map(key)
