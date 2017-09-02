@@ -47,6 +47,7 @@ class ResultView(urwid.Frame):
 
     def _append_stdout_if_non_empty(self, list_items):
         if len(self.result.get('std_output', '')) > 0:
+            blank = urwid.Divider()
             stdout_header = urwid.Text('Stdout:')
             stdout = urwid.Text(self.result['std_output'])
             list_items.extend([blank, stdout_header, stdout])
