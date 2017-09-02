@@ -45,6 +45,12 @@ class ResultView(urwid.Frame):
             urwid.Divider()])
         urwid.Frame.__init__(self, self.overlay, footer=footer)
 
+    def _append_stdout_if_non_empty(self, list_items):
+        if len(self.result.get('std_output', '')) > 0:
+            stdout_header = urwid.Text('Stdout:')
+            stdout = urwid.Text(self.result['std_output'])
+            list_items.extend([blank, stdout_header, stdout])
+
     def make_success_view(self):
         blank = urwid.Divider()
         status_header = urwid.AttrWrap(urwid.Text('Run Code Status: '), 'body')
@@ -57,6 +63,7 @@ class ResultView(urwid.Frame):
                 blank, columns,
                 blank, runtime
         ]
+        self._append_stdout_if_non_empty(list_items)
         return urwid.Padding(urwid.ListBox(urwid.SimpleListWalker(list_items)), left=2, right=2)
 
     def make_failed_view(self):
@@ -82,10 +89,7 @@ class ResultView(urwid.Frame):
                 blank, your_answer_header, your_answer,
                 blank, expected_answer_header, expected_answer
         ]
-        if len(self.result.get('std_output', '')) > 0:
-            stdout_header = urwid.Text('Stdout:')
-            stdout = urwid.Text(self.result['std_output'])
-            list_items.extend([blank, stdout_header, stdout])
+        self._append_stdout_if_non_empty(list_items)
         return urwid.Padding(urwid.ListBox(urwid.SimpleListWalker(list_items)), left=2, right=2)
 
     def make_compile_error_view(self):
@@ -108,6 +112,7 @@ class ResultView(urwid.Frame):
                 blank, your_answer_header, your_answer,
                 blank, expected_answer_header, expected_answer
         ]
+        self._append_stdout_if_non_empty(list_items)
         return urwid.Padding(urwid.ListBox(urwid.SimpleListWalker(list_items)), left=2, right=2)
 
     def make_runtime_error_view(self):
@@ -127,6 +132,7 @@ class ResultView(urwid.Frame):
                 blank, error_header, error_message,
                 blank, your_input_header, your_input,
         ]
+        self._append_stdout_if_non_empty(list_items)
         return urwid.Padding(urwid.ListBox(urwid.SimpleListWalker(list_items)), left=2, right=2)
 
     def make_timeout_view(self):
@@ -143,6 +149,7 @@ class ResultView(urwid.Frame):
                 blank, column_wrap,
                 blank, your_input_header, your_input,
         ]
+        self._append_stdout_if_non_empty(list_items)
         return urwid.Padding(urwid.ListBox(urwid.SimpleListWalker(list_items)), left=2, right=2)
 
 
