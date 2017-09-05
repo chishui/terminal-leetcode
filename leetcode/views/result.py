@@ -46,10 +46,14 @@ class ResultView(urwid.Frame):
         urwid.Frame.__init__(self, self.overlay, footer=footer)
 
     def _append_stdout_if_non_empty(self, list_items):
-        if len(self.result.get('std_output', '')) > 0:
+        std_output = self.result.get('std_output', '')
+        if len(std_output) > 0:
             blank = urwid.Divider()
             stdout_header = urwid.Text('Stdout:')
-            stdout = urwid.Text(self.result['std_output'])
+            if len(std_output) > 100:
+                std_output = '%s...%s\n(output trimmed due to its length)' %\
+                    (std_output[:90], std_output[-10:])
+            stdout = urwid.Text(std_output)
             list_items.extend([blank, stdout_header, stdout])
 
     def make_success_view(self):
