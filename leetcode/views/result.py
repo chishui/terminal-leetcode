@@ -155,12 +155,12 @@ class ResultView(urwid.Frame):
                 blank, column_wrap,
                 blank, your_input_header, your_input,
             ]
-            self._append_stdout_if_non_empty(list_items)
         else:
             list_items = [
                 result_header,
                 blank, column_wrap,
             ]
+        self._append_stdout_if_non_empty(list_items)
         return urwid.Padding(urwid.ListBox(urwid.SimpleListWalker(list_items)), left=2, right=2)
 
 
