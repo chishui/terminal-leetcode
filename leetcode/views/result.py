@@ -19,22 +19,22 @@ class ResultView(urwid.Frame):
                 raise ValueError('Unknow result format: %s' % json.dumps(result))
             if result['status_code'] is 20:
                 self.listbox = self.make_compile_error_view()
-            elif result['status_code'] is 11:
-                self.listbox = self.make_failed_view()
             elif result['status_code'] is 10:
                 self.listbox = self.make_success_view()
-            elif result['status_code'] is 14:
-                self.listbox = self.make_timeout_view()
+            elif result['status_code'] is 11:
+                self.listbox = self.make_failed_view()
+            elif result['status_code'] is 12:# memeory limit exceeded
+                self.listbox = self.make_unified_error_view("Memory Limit Exceeded")
+            elif result['status_code'] is 13:# output limit exceeded
+                self.listbox = self.make_unified_error_view("Output Limit Exceeded")
+            elif result['status_code'] is 14:# timeout
+                self.listbox = self.make_unified_error_view("Time Limit Exceeded")
             elif result['status_code'] is 15:
                 self.listbox = self.make_runtime_error_view()
             else:
                 raise ValueError('Unknow status code: %d' % result['status_code'])
         else:
             raise ValueError('result shouldn\'t be None')
-
-        #self.overlay = urwid.Overlay(
-                    #urwid.LineBox(self.listbox), host_view, #urwid.SolidFill(),
-                    #'center', ('relative', 95), 'middle', None)
 
         self.overlay = urwid.Overlay(urwid.LineBox(self.listbox), host_view,
             align='center', width=('relative', 95),
@@ -125,20 +125,27 @@ class ResultView(urwid.Frame):
         ]
         return urwid.Padding(urwid.ListBox(urwid.SimpleListWalker(list_items)), left=2, right=2)
 
-    def make_timeout_view(self):
+    def make_unified_error_view(self, error_title):
         blank = urwid.Divider()
         status_header = urwid.AttrWrap(urwid.Text('Run Code Status: '), 'body')
-        status = urwid.AttrWrap(urwid.Text('Time Limit Exceeded'), 'hometag')
-        columns = urwid.Columns([(17, status_header), (20, status)])
+        status = urwid.AttrWrap(urwid.Text(error_title), 'hometag')
+        columns = urwid.Columns([(17, status_header), (30, status)])
         column_wrap = urwid.WidgetWrap(columns)
-        result_header = urwid.Text('--- Run Code Result: ---', align='center')
-        your_input_header = urwid.Text('Last executed input:')
-        your_input = urwid.Text(self.result['last_testcase'])
-        list_items = [
+        if 'last_testcase' in self.result:
+            result_header = urwid.Text('--- Run Code Result: ---', align='center')
+            your_input_header = urwid.Text('Last executed input:')
+            your_input = urwid.Text(self.result['last_testcase'])
+            list_items = [
                 result_header,
                 blank, column_wrap,
                 blank, your_input_header, your_input,
-        ]
+            ]
+        else:
+            list_items = [
+                result_header,
+                blank, column_wrap,
+            ]
+
         return urwid.Padding(urwid.ListBox(urwid.SimpleListWalker(list_items)), left=2, right=2)
 
 
