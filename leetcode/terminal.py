@@ -78,7 +78,8 @@ class Terminal(object):
             self.goto_view(self.make_quit_confirmation())
 
         elif key is 's':
-            self.goto_view(self.make_submit_confirmation())
+            if not self.is_home:
+                self.goto_view(self.make_submit_confirmation())
 
         elif not self.is_home and (key is 'left' or key is 'h'):
             self.go_back()
