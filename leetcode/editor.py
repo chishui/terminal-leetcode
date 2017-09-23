@@ -35,5 +35,5 @@ def open_in_new_tmux_window(edit_cmd):
         pass
     cmd = "tmux split-window -h"
     os.system(cmd)
-    cmd = "tmux send-keys '%s' C-m" % edit_cmd
+    cmd = "tmux send-keys -t right '%s' C-m" % edit_cmd
     os.system(cmd)
