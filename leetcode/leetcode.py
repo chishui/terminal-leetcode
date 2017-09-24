@@ -96,6 +96,9 @@ class Quiz(object):
             return False
 
     def submit(self, code):
+        # Call this upfront so we have the right CSRF
+        ensure_login()
+
         body = { 'question_id': self.id,
                 'test_mode': False,
                 'lang': LANG_MAPPING.get(config.language, 'cpp'),
