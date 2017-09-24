@@ -71,6 +71,11 @@ def is_login():
     return 'user_name' in data and data['user_name'] != ''
 
 
+def ensure_login():
+    if not is_login():
+        login()
+
+
 def retrieve(url, headers=None, method='GET', data=None):
     try:
         if method == 'GET':

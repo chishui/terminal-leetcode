@@ -1,7 +1,7 @@
 import unittest
 import mock
 from leetcode.leetcode import *
-from leetcode.auth import NetworkError
+from leetcode.auth import NetworkError, LOGIN_URL, API_URL
 import requests_mock
 import requests
 
@@ -66,6 +66,7 @@ class TestLeetcode(unittest.TestCase):
 
         with requests_mock.Mocker() as m:
             m.get(API_URL, status_code=403)
+            m.get(LOGIN_URL, status_code=403)
             self.assertIsNone(self.leet.load())
             m.get(API_URL, json={"error": "not found"})
             self.assertIsNone(self.leet.load())
@@ -119,6 +120,7 @@ class TestLeetcode(unittest.TestCase):
         item.submission_status = 'ac'
 
         with requests_mock.Mocker() as m:
+            m.get(API_URL, json={'user_name': 'fake'})
             m.get('http://hello.com', status_code=403)
             self.assertFalse(item.load())
             m.get('http://hello.com', text=data)
@@ -142,6 +144,7 @@ class TestLeetcode(unittest.TestCase):
         item.submission_status = 'ac'
 
         with requests_mock.Mocker() as m:
+            m.get(API_URL, json={'user_name': 'fake'})
             m.post(item.url + '/submit/', status_code=402)
             self.assertFalse(item.submit('code')[0])
 
@@ -162,6 +165,7 @@ class TestLeetcode(unittest.TestCase):
         item.submission_status = 'ac'
         url = SUBMISSION_URL.format(id=1)
         with requests_mock.Mocker() as m:
+            m.get(API_URL, json={'user_name': 'fake'})
             m.get(url, status_code=403)
             self.assertEqual(item.check_submission_result(1)[0], -100)
             m.get(url, json={ 'state': 'PENDING' })

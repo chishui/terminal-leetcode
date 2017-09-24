@@ -4,7 +4,7 @@ import json
 import logging
 from bs4 import BeautifulSoup
 from .config import config
-from .auth import session, headers, retrieve
+from .auth import session, headers, retrieve, ensure_login
 from .code import *
 
 BASE_URL = 'https://leetcode.com'
@@ -30,6 +30,12 @@ LANG_MAPPING = {
     'Go': 'go',
 }
 
+
+def safe_retrieve(url, headers=None, method='GET', data=None):
+    ensure_login()
+    return retrieve(url, headers, method, data)
+
+
 class Quiz(object):
     def __init__(self):
         self.id = None
@@ -48,7 +54,7 @@ class Quiz(object):
         self.logger = logging.getLogger(__name__)
 
     def load(self):
-        r = retrieve(self.url)
+        r = safe_retrieve(self.url)
         if r.status_code != 200:
             return False
         text = r.text.encode('utf-8')
@@ -56,8 +62,8 @@ class Quiz(object):
         bs = BeautifulSoup(text, 'lxml')
 
         if bs.find('form', 'form-signin'):
-            self.session.cookies.clear()
-            r = retrieve(BASE_URL + item.url)
+            session.cookies.clear()
+            r = safe_retrieve(BASE_URL + item.url)
 
         try:
             content = bs.find('div', 'question-description')
@@ -109,7 +115,7 @@ class Quiz(object):
             'X-CSRFToken': csrftoken,
             'X-Requested-With': 'XMLHttpRequest'})
 
-        r = retrieve(self.url + '/submit/', method='POST', data=json.dumps(body), headers=newheaders)
+        r = safe_retrieve(self.url + '/submit/', method='POST', data=json.dumps(body), headers=newheaders)
         if r.status_code != 200:
             return (False, 'Request failed!')
         text = r.text.encode('utf-8')
@@ -124,7 +130,7 @@ class Quiz(object):
 
     def check_submission_result(self, submission_id):
         url = SUBMISSION_URL.format(id=submission_id)
-        r = retrieve(url)
+        r = safe_retrieve(url)
         if r.status_code != 200:
             return (-100, 'Request failed!')
         text = r.text.encode('utf-8')
@@ -161,7 +167,7 @@ class Leetcode(object):
         return [i for i in self.quizzes if i.submission_status == 'ac']
 
     def load(self):
-        r = retrieve(API_URL)
+        r = safe_retrieve(API_URL)
         if r.status_code != 200:
             return None
         text = r.text.encode('utf-8')
