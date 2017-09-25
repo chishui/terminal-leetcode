@@ -6,4 +6,4 @@ Makefile
 /.git
 .DS_Store
 /.virtualenv
-
+/.cache
