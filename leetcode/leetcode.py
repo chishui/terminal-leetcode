@@ -180,7 +180,7 @@ class Leetcode(object):
                 data = Quiz()
                 data.title = quiz['stat']['question__title']
                 data.id = quiz['stat']['question_id']
-                data.locked = not json_data['is_paid'] and quiz['paid_only']
+                data.locked = not json_data['is_paid'] and quiz['paid_only'] if 'is_paid' in json_data else True
                 data.difficulty = difficulty[quiz['difficulty']['level']]
                 data.favorite = quiz['is_favor']
                 data.acceptance = "%.1f%%" % (float(quiz['stat']['total_acs']) * 100 / float(quiz['stat']['total_submitted']))
