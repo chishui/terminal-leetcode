@@ -4,11 +4,11 @@ from setuptools import setup
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
-requirements = ['urwid', 'requests', 'bs4', 'lxml']
+requirements = ['urwid', 'requests', 'bs4', 'lxml', 'decorator', 'pycookiecheat']
 
 setup(
     name = "terminal-leetcode",
-    version = "0.0.16",
+    version = "0.0.17",
     author = "Liyun Xiu",
     author_email = "chishui2@gmail.com",
     description = "A terminal based leetcode website viewer",
@@ -24,7 +24,7 @@ setup(
         #"Operating System :: MacOS :: MacOS X",
         #"Operating System :: POSIX",
         #"Natural Language :: English",
-        #"Programming Language :: Python :: 2.7",
+        #"Programming Language :: Python :: 3.7",
         #"Development Status :: 2 - Pre-Alpha",
         #"Environment :: Console :: Curses",
         #"Topic :: Utilities",

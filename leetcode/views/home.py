@@ -62,16 +62,23 @@ class HomeView(urwid.Frame):
         self.last_sort = {'attr': 'id', 'reverse': True}
         self.last_search_text = None
 
-    def sort_list(self, attr, cmp=None):
+    def sort_list(self, attr, conversion=None):
         if attr == self.last_sort['attr']:
             self.last_sort['reverse'] = not self.last_sort['reverse']
         else:
             self.last_sort['reverse'] = False
             self.last_sort['attr'] = attr
 
-        self.listbox.body.sort(key=lambda x: getattr(x.data, attr),
-                               reverse=self.last_sort['reverse'],
-                               cmp=cmp)
+        if conversion:
+            self.listbox.body.sort(key=lambda x: conversion(getattr(x.data, attr)),
+                                   reverse=self.last_sort['reverse'])
+        else:
+            self.listbox.body.sort(key=lambda x: getattr(x.data, attr),
+                                   reverse=self.last_sort['reverse'])
+
+    def difficulty_conversion(self, x):
+        d = {'Easy': 0, 'Medium': 1, 'Hard': 2}
+        return d[x]
 
     def difficulty_cmp(self, x, y):
         d = {'Easy': 0, 'Medium': 1, 'Hard': 2}
@@ -91,7 +98,7 @@ class HomeView(urwid.Frame):
         elif key is '3':
             self.sort_list('acceptance')
         elif key is '4':
-            self.sort_list('difficulty', cmp=self.difficulty_cmp)
+            self.sort_list('difficulty', conversion=self.difficulty_conversion)
         elif key is 'home':
             self.listbox.focus_position = 0
         elif key is 'end':

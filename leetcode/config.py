@@ -1,5 +1,5 @@
 import os
-import ConfigParser
+import configparser
 
 HOME = os.path.expanduser('~')
 CONFIG_FOLDER = os.path.join(HOME, '.config', 'leetcode')
@@ -18,7 +18,7 @@ class Config(object):
         path # code path
     '''
     def __init__(self):
-        self.parser = ConfigParser.SafeConfigParser({'username' : '', 'password' : '',
+        self.parser = configparser.SafeConfigParser({'username' : '', 'password' : '',
                                                      'language' : 'C++', 'ext': '',
                                                      'path' : '', 'keep_quiz_detail': 'false',
                                                      'tmux_support': 'false'})

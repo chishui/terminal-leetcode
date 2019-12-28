@@ -4,3 +4,5 @@ requests
 mock
 requests_mock
 urwid
+decorator
+pycookiecheat

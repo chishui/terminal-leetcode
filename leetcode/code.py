@@ -1,18 +1,22 @@
 import os
+from pathlib import Path
 from functools import wraps
 from .config import CONFIG_FOLDER, config
+from .trace import trace
 import subprocess
 
 SNIPPET_FOLDER = os.path.join(CONFIG_FOLDER, 'snippet')
 BEFORE = os.path.join(SNIPPET_FOLDER, 'before')
 AFTER = os.path.join(SNIPPET_FOLDER, 'after')
 
+@trace
 def get_data(filepath):
     if os.path.exists(filepath):
         with open(filepath, 'r') as f:
             return f.read()
     return ''
 
+@trace
 def enhance_code(func):
     @wraps(func)
     def wrapper(code, language, filepath):
@@ -22,6 +26,7 @@ def enhance_code(func):
         return func(code, language, filepath)
     return wrapper
 
+@trace
 def generate_makefile(func):
     @wraps(func)
     def wrapper(code, language, filepath):
@@ -46,6 +51,7 @@ def generate_makefile(func):
         #f.write(line.encode('utf8') + '\n')
     #f.write('*/\n')
 
+@trace
 def unique_file_name(filepath):
     if not os.path.exists(filepath):
         return filepath
@@ -58,16 +64,19 @@ def unique_file_name(filepath):
         index = index + 1
     return filepath
 
+@trace
 def get_code_file_path(quiz_id):
     path = config.path
-    if not path:
-        path = '~/leetcode'
+    if not path or not Path(config.path).exists():
+        path = Path.home() / 'leetcode'
+        if not path.exists():
+            path.mkdir()
+    else:
+        path = Path(path)
 
-    if not os.path.exists(path):
-        os.makedirs(path)
+    return path / Path(str(quiz_id) + '.' + config.ext)
 
-    return os.path.join(path, str(quiz_id) + '.' + config.ext)
-
+@trace
 def get_code_for_submission(filepath):
     data = get_data(filepath)
     before = get_data(BEFORE)
