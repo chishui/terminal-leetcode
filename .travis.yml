@@ -1,7 +1,7 @@
 language: python
 python:
-  - "2.7"
+  - "3.7"
 install:
-  - pip install bs4 requests urwid pytest requests_mock lxml
+  - pip install bs4 requests urwid pytest requests_mock lxml decorator pycookiecheat
 script:
   - py.test -v
