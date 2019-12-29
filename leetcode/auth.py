@@ -86,7 +86,7 @@ class Auth(object):
             elif method == 'POST':
                 r = requests.post(url, headers=headers, data=data, cookies=self.cookies)
             if r.status_code != 200:
-                self.logger.info(r.text)
+                logger.info(r.text)
             return r
         except requests.exceptions.RequestException as e:
             if r:

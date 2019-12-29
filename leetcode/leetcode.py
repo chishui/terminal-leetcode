@@ -102,10 +102,3 @@ class Leetcode(object):
         except Exception as e:
             self.logger.error(e)
             return None
-
-
-def format_language_text(language):
-    language = language.replace('+', '\+')
-    language = language.replace('#', '\#')
-    return language
-
