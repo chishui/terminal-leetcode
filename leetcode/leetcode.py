@@ -63,6 +63,8 @@ class Leetcode(object):
 
     @trace
     def get_user(self):
+        if not self.auth.is_login:
+            return
         query = """{
     user {
         username

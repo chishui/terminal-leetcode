@@ -27,6 +27,9 @@ class Quiz(object):
         self.logger = logging.getLogger(__name__)
 
     def load(self):
+        if not self.auth.is_login:
+            return False
+
         query = """query questionData($titleSlug: String!) {
     question(titleSlug: $titleSlug) {
         title
@@ -99,6 +102,8 @@ class Quiz(object):
 
     @trace
     def submit(self, code):
+        if not self.auth.is_login:
+            return (False, "")
         body = {'question_id': self.id,
                 'test_mode': False,
                 'lang': LANG_MAPPING.get(config.language, 'cpp'),
