@@ -10,7 +10,7 @@ This project is inspired by [RTV](https://github.com/michael-lazar/rtv).
 
 [![Build Status](https://travis-ci.org/chishui/terminal-leetcode.svg?branch=master)](https://travis-ci.org/chishui/terminal-leetcode)
 [![PyPI](https://img.shields.io/pypi/v/nine.svg?maxAge=2592000)](https://pypi.python.org/pypi/terminal-leetcode)
-[![PyPI](https://img.shields.io/badge/python-2.7-blue.svg?maxAge=2592000)](https://pypi.python.org/pypi/terminal-leetcode)  
+[![PyPI](https://img.shields.io/badge/python-3.7-blue.svg?maxAge=2592000)](https://pypi.python.org/pypi/terminal-leetcode)  
 
 [Discuss in Slack](https://terminal-leetcode.slack.com)
 --------------

@@ -6,6 +6,7 @@ HOME = Path.home()
 CONFIG_FOLDER = HOME.joinpath('.config', 'leetcode')
 CONFIG_FILE = CONFIG_FOLDER.joinpath('config.cfg')
 TAG_FILE = CONFIG_FOLDER.joinpath('tag.json')
+SECTION = 'leetcode'
 
 class Config(object):
     '''
@@ -36,17 +37,23 @@ class Config(object):
             return True
 
         self.parser.read(CONFIG_FILE)
-        if 'leetcode' not in self.parser.sections():
+        if SECTION not in self.parser.sections():
             return False
 
-        self.username = self.parser.get('leetcode', 'username')
-        self.password = self.parser.get('leetcode', 'password')
-        self.language = self.parser.get('leetcode', 'language')
-        self.ext = self.parser.get('leetcode', 'ext')
-        self.path = self.parser.get('leetcode', 'path')
+        self.username = self.parser.get(SECTION, 'username')
+        self.password = self.parser.get(SECTION, 'password')
+        self.language = self.parser.get(SECTION, 'language')
+        self.ext = self.parser.get(SECTION, 'ext')
+        self.path = self.parser.get(SECTION, 'path')
         self.path = os.path.expanduser(self.path)
-        self.keep_quiz_detail = self.parser.getboolean('leetcode', 'keep_quiz_detail')
-        self.tmux_support = self.parser.getboolean('leetcode', 'tmux_support')
+        self.keep_quiz_detail = self.parser.getboolean(SECTION, 'keep_quiz_detail')
+        self.tmux_support = self.parser.getboolean(SECTION, 'tmux_support')
         return True
+
+    def write(self, key, value):
+        self.load()
+        self.parser.set(SECTION, key, value)
+        with open(CONFIG_FILE, 'w') as configfile:
+            self.parser.write(configfile)
 
 config = Config()

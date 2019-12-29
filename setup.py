@@ -19,7 +19,7 @@ setup(
     long_description=read('README.md'),
     include_package_data=True,
     install_requires=requirements,
-    entry_points={'console_scripts': ['leetcode=leetcode.__main__:main']},
+    entry_points={'console_scripts': ['leetcode=leetcode.cli:main']},
     #classifiers=[
         #"Operating System :: MacOS :: MacOS X",
         #"Operating System :: POSIX",
