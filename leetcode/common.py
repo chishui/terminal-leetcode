@@ -1,4 +1,3 @@
-
 BASE_URL = 'https://leetcode.com'
 GRAPHQL_URL = 'https://leetcode.com/graphql'
 API_URL = BASE_URL + '/api/problems/algorithms/'
@@ -17,9 +16,9 @@ LANG_MAPPING = {
     'Go': 'go',
 }
 
+
 def merge_two_dicts(x, y):
     """Given two dicts, merge them into a new dict as a shallow copy."""
     z = x.copy()
     z.update(y)
     return z
-

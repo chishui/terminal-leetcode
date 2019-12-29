@@ -1,7 +1,8 @@
 import argparse
-from .common import *
+from .common import LANG_MAPPING
 from .config import config
 from .__main__ import main as main_entry
+
 
 def main():
     parser = argparse.ArgumentParser(prog='Terminal Leetcode', description='Terminal Leetcode')
@@ -12,7 +13,7 @@ def main():
     parser.add_argument('-e', '--ext', action='store', help='Set programming file extention')
 
     args = parser.parse_args()
-    if args.setting: 
+    if args.setting:
         if args.setting == "setting":
             if args.language:
                 config.write('language', args.language)
@@ -24,5 +25,3 @@ def main():
             parser.print_help()
     else:
         main_entry()
-        
-          

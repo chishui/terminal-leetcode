@@ -1,13 +1,12 @@
-import subprocess
 from pathlib import Path
 from functools import wraps
 from .config import CONFIG_FOLDER, config
 from .trace import trace
-from .editor import edit
 
 SNIPPET_FOLDER = Path(CONFIG_FOLDER) / Path('snippet')
 BEFORE = SNIPPET_FOLDER.joinpath('before')
 AFTER = SNIPPET_FOLDER.joinpath('after')
+
 
 @trace
 def get_data(filepath):
@@ -15,6 +14,7 @@ def get_data(filepath):
         with open(filepath, 'r') as f:
             return f.read()
     return ''
+
 
 @trace
 def enhance_code(func):
@@ -25,6 +25,7 @@ def enhance_code(func):
         code = before + code + after
         return func(code, language, filepath)
     return wrapper
+
 
 @trace
 def generate_makefile(func):
@@ -42,14 +43,6 @@ def generate_makefile(func):
         return func(code, language, filepath)
     return wrapper
 
-#def write_quiz_detail(data, f):
-    #lines = data.body.split('\n')
-    #f.write('/*\n')
-    #comment_symbol = "* "
-    #for line in lines:
-        #f.write(comment_symbol)
-        #f.write(line.encode('utf8') + '\n')
-    #f.write('*/\n')
 
 @trace
 def unique_file_name(filepath):
@@ -68,6 +61,7 @@ def unique_file_name(filepath):
         index = index + 1
     return filepath
 
+
 @trace
 def get_code_file_path(quiz_id):
     path = config.path
@@ -80,12 +74,14 @@ def get_code_file_path(quiz_id):
 
     return path / Path(str(quiz_id) + '.' + config.ext)
 
+
 @trace
 def get_code_for_submission(filepath):
     data = get_data(filepath)
     before = get_data(BEFORE)
     after = get_data(AFTER)
     return data.replace(before, '').replace(after, '')
+
 
 @trace
 def edit_code(quiz_id, code, newcode=False):
@@ -98,6 +94,7 @@ def edit_code(quiz_id, code, newcode=False):
         with open(filepath, 'w') as f:
             f.write(code)
     return filepath
+
 
 @enhance_code
 @generate_makefile

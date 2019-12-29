@@ -1,5 +1,6 @@
 import urwid
 
+
 class HelpView(urwid.Frame):
     '''
         basic:
@@ -42,5 +43,3 @@ class HelpView(urwid.Frame):
             pass
         else:
             return urwid.Frame.keypress(self, size, key)
-
-

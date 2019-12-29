@@ -8,6 +8,7 @@ CONFIG_FILE = CONFIG_FOLDER.joinpath('config.cfg')
 TAG_FILE = CONFIG_FOLDER.joinpath('tag.json')
 SECTION = 'leetcode'
 
+
 class Config(object):
     '''
     Config is a class to get user's configuration from leetcode.cfg
@@ -20,10 +21,14 @@ class Config(object):
         path # code path
     '''
     def __init__(self):
-        self.parser = configparser.ConfigParser({'username' : '', 'password' : '',
-                                                     'language' : 'C++', 'ext': '',
-                                                     'path' : '', 'keep_quiz_detail': 'false',
-                                                     'tmux_support': 'false'})
+        self.parser = configparser.ConfigParser({
+            'username': '',
+            'password': '',
+            'language': 'C++',
+            'ext': '',
+            'path': '',
+            'keep_quiz_detail': 'false',
+            'tmux_support': 'false'})
         self.username = None
         self.password = None
         self.language = 'C++'
@@ -55,5 +60,6 @@ class Config(object):
         self.parser.set(SECTION, key, value)
         with open(CONFIG_FILE, 'w') as configfile:
             self.parser.write(configfile)
+
 
 config = Config()

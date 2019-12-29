@@ -1,6 +1,6 @@
 import unittest
 import os
-import mock
+from unittest import mock
 import json
 from leetcode.log import *
 
@@ -40,7 +40,7 @@ class TestLog(unittest.TestCase) :
         mock_path.return_value = True
         init_logger()
 
-    @mock.patch('__builtin__.open')
+    @mock.patch('builtins.open')
     def test_read_json_data(self, mock_open):
         mock_open.return_value.__enter__.return_value.read.return_value = data
         self.assertEqual(read_json_data(json_file), json.loads(data))

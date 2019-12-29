@@ -1,20 +1,21 @@
 import time
 from threading import Thread
 import urwid
-from .viewhelper import *
+from .viewhelper import delay_refresh
 from leetcode.model import EasyLock
+
 
 class LoadingView(urwid.Frame):
     '''
         Loading View When Doing HTTP Request
     '''
-    def __init__(self, text, width, host_view, loop = None):
+    def __init__(self, text, width, host_view, loop=None):
         self.running = False
         self.lock = EasyLock()
         self.loop = loop
         self.overlay = urwid.Overlay(
-                    urwid.LineBox(urwid.Text(text)), host_view, #urwid.SolidFill(),
-                    'center', width, 'middle', None)
+            urwid.LineBox(urwid.Text(text)), host_view,  # urwid.SolidFill(),
+            'center', width, 'middle', None)
         urwid.Frame.__init__(self, self.overlay)
 
     def keypress(self, size, key):
@@ -55,12 +56,12 @@ class Toast(urwid.Frame):
     '''
         Toast View
     '''
-    def __init__(self, text, width, host_view, loop = None):
+    def __init__(self, text, width, host_view, loop=None):
         self.loop = loop
         self.host_view = host_view
         self.overlay = urwid.Overlay(
-                    urwid.LineBox(urwid.Text(text)), host_view, #urwid.SolidFill(),
-                    'center', width, 'middle', None)
+            urwid.LineBox(urwid.Text(text)), host_view,  # urwid.SolidFill(),
+            'center', width, 'middle', None)
         urwid.Frame.__init__(self, self.overlay)
 
     def keypress(self, size, key):
@@ -71,5 +72,3 @@ class Toast(urwid.Frame):
 
     def destroy(self):
         self.loop.widget = self.host_view
-
-

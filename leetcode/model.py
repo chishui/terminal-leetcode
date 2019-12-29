@@ -1,5 +1,6 @@
 from threading import Lock
 
+
 class EasyLock(object):
     def __init__(self):
         self.lock = Lock()

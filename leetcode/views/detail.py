@@ -1,22 +1,18 @@
-import os
-import re
-import subprocess
 import webbrowser
 import urwid
 import logging
 from .viewhelper import vim_key_map
-from ..code import *
+from ..code import edit_code
 from ..leetcode import BASE_URL
 from ..editor import edit
-from ..config import config
 from ..trace import trace
-from ..common import *
+
 
 class DetailView(urwid.Frame):
     '''
         Quiz Item Detail View
     '''
-    def __init__(self, quiz, loop = None):
+    def __init__(self, quiz, loop=None):
         self.quiz = quiz
         self.loop = loop
         self.logger = logging.getLogger(__name__)
@@ -31,8 +27,6 @@ class DetailView(urwid.Frame):
         urwid.Frame.__init__(self, self.listbox)
 
     def make_body_widgets(self):
-        newline = 0
-        tags = False
         text_widgets = []
 
         for line in self.quiz.content.split('\n'):
@@ -52,17 +46,17 @@ class DetailView(urwid.Frame):
         if key in ignore_key:
             pass
         # edit sample code
-        if key is 'e':
+        if key == 'e':
             self.edit_code(False)
         # edit new sample code
-        elif key is 'n':
+        elif key == 'n':
             self.edit_code(True)
         # open discussion page from default browser
-        elif key is 'd':
+        elif key == 'd':
             url = self.get_discussion_url()
             webbrowser.open(url)
         # open solutions page from default browser
-        elif key is 'S':
+        elif key == 'S':
             url = self.get_solutions_url()
             webbrowser.open(url)
         else:
@@ -73,11 +67,8 @@ class DetailView(urwid.Frame):
         # open editor to edit code
         edit(filepath, self.loop)
 
-
     def get_discussion_url(self):
         return f"{BASE_URL}/problems/{self.quiz.slug}/discuss"
 
     def get_solutions_url(self):
         return f"{BASE_URL}/problems/{self.quiz.slug}/solution"
-
-

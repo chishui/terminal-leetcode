@@ -1,5 +1,5 @@
 import unittest
-import mock
+from unittest import mock
 from leetcode.views.result import ResultView
 
 class TestResultView(unittest.TestCase):

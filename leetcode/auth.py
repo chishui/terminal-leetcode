@@ -22,6 +22,7 @@ headers = {
 
 logger = logging.getLogger(__name__)
 
+
 class Auth(object):
     def __init__(self):
         self.cookies = None
@@ -32,19 +33,19 @@ class Auth(object):
         self.cookies = cookiejar.FileCookieJar(COOKIE_PATH)
         try:
             self.cookies.load(ignore_discard=True)
-        except:
+        except Exception:
             pass
 
     def get_cookies_from_chrome(self):
         self.cookies = chrome_cookies(BASE_URL)
 
     @trace
-    def login():
+    def login(self):
         logger = logging.getLogger(__name__)
         if not config.username or not config.password:
             return False
         login_data = {}
-        r = retrieve(LOGIN_URL, headers=headers)
+        r = self.retrieve(LOGIN_URL, headers=headers)
         if r.status_code != 200:
             logger.error('login failed')
             return False
@@ -55,9 +56,9 @@ class Auth(object):
         login_data['password'] = config.password
         login_data['remember'] = 'on'
 
-        request_headers ={"Accept": "*/*", "DNT": "1", "Content-Type": "multipart/form-data; boundary=----WebKitFormBoundary725gDSRiGxbNlBGY"}
+        request_headers = {"Accept": "*/*", "DNT": "1", "Content-Type": "multipart/form-data; boundary=----WebKitFormBoundary725gDSRiGxbNlBGY"}
         request_headers.update(headers)
-        r = retrieve(LOGIN_URL, method='POST', headers=request_headers, data=json.dumps(login_data))
+        r = self.retrieve(LOGIN_URL, method='POST', headers=request_headers, data=json.dumps(login_data))
         logger.info(r.text)
         logger.info(r.content)
         if r.status_code != 200:
@@ -65,12 +66,12 @@ class Auth(object):
             return False
 
         logger.info("login success")
-        session.cookies.save()
+        # session.cookies.save()
         return True
 
     @trace
-    def is_login():
-        r = retrieve(API_URL, headers=headers)
+    def is_login(self):
+        r = self.retrieve(API_URL, headers=headers)
         if r.status_code != 200:
             return False
         text = r.content
@@ -88,7 +89,7 @@ class Auth(object):
             if r.status_code != 200:
                 logger.info(r.text)
             return r
-        except requests.exceptions.RequestException as e:
+        except requests.exceptions.RequestException:
             if r:
                 raise NetworkError('Network error: url: %s' % url, r.status_code)
             else:

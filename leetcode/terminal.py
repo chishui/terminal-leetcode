@@ -1,18 +1,15 @@
 import sys
-import time
 import logging
 from threading import Thread
 import urwid
-from .leetcode import Leetcode, Quiz
+from .leetcode import Leetcode
 from .views.home import HomeView
 from .views.detail import DetailView
 from .views.help import HelpView
-from .views.loading import *
-from .views.viewhelper import *
+from .views.loading import LoadingView, Toast
+from .views.viewhelper import delay_refresh
 from .views.result import ResultView
-from .config import config
-from .auth import *
-from .code import *
+from .code import get_code_file_path, get_code_for_submission
 
 palette = [
     ('body', 'dark cyan', ''),
@@ -22,7 +19,8 @@ palette = [
     ('tag', 'white', 'light cyan', 'standout'),
     ('hometag', 'dark red', ''),
     ('accepted', 'dark green', '')
-    ]
+]
+
 
 class Terminal(object):
     def __init__(self, auth):
@@ -57,44 +55,44 @@ class Terminal(object):
 
     def keystroke(self, key):
         if self.quit_confirm_view and self.current_view == self.quit_confirm_view:
-            if key is 'y':
+            if key == 'y':
                 raise urwid.ExitMainLoop()
             else:
                 self.go_back()
 
         elif self.submit_confirm_view and self.current_view == self.submit_confirm_view:
             self.go_back()
-            if key is 'y':
+            if key == 'y':
                 self.send_code(self.detail_view.quiz)
 
         elif self.current_view == self.search_view:
-            if key is 'enter':
+            if key == 'enter':
                 text = self.search_view.contents[1][0].original_widget.get_edit_text()
                 self.home_view.handle_search(text)
                 self.go_back()
-            elif key is 'esc':
+            elif key == 'esc':
                 self.go_back()
 
         elif key in ('q', 'Q'):
             self.goto_view(self.make_quit_confirmation())
 
-        elif key is 's':
+        elif key == 's':
             if not self.is_home:
                 self.goto_view(self.make_submit_confirmation())
 
-        elif not self.is_home and (key is 'left' or key is 'h'):
+        elif not self.is_home and (key == 'left' or key == 'h'):
             self.go_back()
 
-        elif key is 'H':
+        elif key == 'H':
             if not self.help_view:
                 self.make_helpview()
             self.goto_view(self.help_view)
 
-        elif key is 'R':
+        elif key == 'R':
             if self.is_home:
                 self.reload_list()
 
-        elif key is 'f':
+        elif key == 'f':
             if self.is_home:
                 self.enter_search()
 
@@ -131,13 +129,13 @@ class Terminal(object):
     def make_submit_confirmation(self):
         text = urwid.AttrMap(urwid.Text('Do you want to submit your code ? (y/n)'), 'body')
         self.submit_confirm_view = urwid.Overlay(text, self.current_view, 'left',
-                                               ('relative', 100), 'bottom', None)
+                                                 ('relative', 100), 'bottom', None)
         return self.submit_confirm_view
 
     def make_search_view(self):
         text = urwid.AttrMap(urwid.Edit('Search by id: ', ''), 'body')
         self.search_view = urwid.Overlay(text, self.current_view, 'left',
-                                               ('relative', 100), 'bottom', None)
+                                         ('relative', 100), 'bottom', None)
         return self.search_view
 
     def make_detailview(self, data):
@@ -155,8 +153,8 @@ class Terminal(object):
                 ('fixed', 15, urwid.Padding(urwid.AttrWrap(
                     urwid.Text('%s' % self.leetcode.username),
                     'head', ''))),
-                urwid.AttrWrap(urwid.Text('You have solved %d / %d problems. ' %
-                    (len(self.leetcode.solved), len(self.leetcode.quizzes))), 'head', ''),
+                urwid.AttrWrap(urwid.Text('You have solved %d / %d problems. ' % (
+                    len(self.leetcode.solved), len(self.leetcode.quizzes))), 'head', ''),
             ]
             return urwid.Columns(columns)
         else:
@@ -192,9 +190,9 @@ class Terminal(object):
         delay_refresh(self.loop)
 
     def run_retrieve_home(self):
-        #self.leetcode.is_login = is_login()
-        #if not self.leetcode.is_login:
-            #self.leetcode.is_login = login()
+        # self.leetcode.is_login = is_login()
+        # if not self.leetcode.is_login:
+        # self.leetcode.is_login = login()
 
         if self.loading_view:
             self.loading_view.set_text('Loading')
@@ -220,7 +218,7 @@ class Terminal(object):
 
     def run_send_code(self, quiz):
         filepath = get_code_file_path(quiz.id)
-        if not os.path.exists(filepath):
+        if not filepath.exists():
             return
         code = get_code_for_submission(filepath)
         code = code.replace('\n', '\r\n')
@@ -264,7 +262,7 @@ class Terminal(object):
             self.loop.run()
         except KeyboardInterrupt:
             self.logger.info('Keyboard interrupt')
-        except Exception as e:
+        except Exception:
             self.logger.exception("Fatal error in main loop")
         finally:
             self.clear_thread()
@@ -274,5 +272,4 @@ class Terminal(object):
         if self.loading_view:
             self.loading_view.end()
         if self.t and self.t.is_alive():
-            t.join()
-
+            self.t.join()

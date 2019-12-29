@@ -4,7 +4,7 @@ import json
 import urwid
 from .viewhelper import vim_key_map
 from ..config import TAG_FILE
-import logging
+
 
 class ItemWidget(urwid.WidgetWrap):
     '''
@@ -80,30 +80,24 @@ class HomeView(urwid.Frame):
         d = {'Easy': 0, 'Medium': 1, 'Hard': 2}
         return d[x]
 
-    def difficulty_cmp(self, x, y):
-        d = {'Easy': 0, 'Medium': 1, 'Hard': 2}
-        x = d[x]
-        y = d[y]
-        return cmp(x, y)
-
     def keypress(self, size, key):
         key = vim_key_map(key)
         ignore_key = ('h', 'left')
         if key in ignore_key:
             pass
-        elif key is '1':
+        elif key == '1':
             self.sort_list('id')
-        elif key is '2':
+        elif key == '2':
             self.sort_list('title')
-        elif key is '3':
+        elif key == '3':
             self.sort_list('acceptance')
-        elif key is '4':
+        elif key == '4':
             self.sort_list('difficulty', conversion=self.difficulty_conversion)
-        elif key is 'home':
+        elif key == 'home':
             self.listbox.focus_position = 0
-        elif key is 'end':
+        elif key == 'end':
             self.listbox.focus_position = len(self.listbox.body) - 1
-        elif key is 'n':
+        elif key == 'n':
             self.handle_search(self.last_search_text, True)
         else:
             return urwid.Frame.keypress(self, size, key)
@@ -139,6 +133,7 @@ def make_itemwidgets(data, marks):
         items.append(ItemWidget(quiz, marks=marks))
     return items
 
+
 def is_string_an_integer(s):
     try:
         int(s)
@@ -148,11 +143,13 @@ def is_string_an_integer(s):
     except TypeError:
         return False
 
+
 def load_marks():
     if not os.path.exists(TAG_FILE):
         return {}
     with open(TAG_FILE, 'r') as f:
         return json.load(f)
+
 
 def make_mark(marks, quiz_id):
     quiz_id = str(quiz_id)

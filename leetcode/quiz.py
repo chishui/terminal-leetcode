@@ -1,11 +1,11 @@
-import re
 import json
 import logging
 from bs4 import BeautifulSoup
 from .config import config
 from .trace import trace
-from .common import *
+from .common import BASE_URL, merge_two_dicts, GRAPHQL_URL, LANG_MAPPING, SUBMISSION_URL
 from .auth import headers
+
 
 class Quiz(object):
     def __init__(self, auth):
@@ -60,20 +60,20 @@ class Quiz(object):
         judgerAvailable
         __typename
     }
-}""";
+}"""
         extra_headers = {
-          'Origin': BASE_URL,
-          'Referer': self.url,
-          'X-CSRFToken': self.auth.cookies['csrftoken'],
-          'Accept': '*/*',
-          'Accept-Encoding': 'gzip, deflate',
-          'Content-Type': 'application/json',
+            'Origin': BASE_URL,
+            'Referer': self.url,
+            'X-CSRFToken': self.auth.cookies['csrftoken'],
+            'Accept': '*/*',
+            'Accept-Encoding': 'gzip, deflate',
+            'Content-Type': 'application/json',
         }
 
-        new_headers = merge_two_dicts(headers, extra_headers);
+        new_headers = merge_two_dicts(headers, extra_headers)
         body = {
             "query": query,
-            "variables" : {"titleSlug": self.slug},
+            "variables": {"titleSlug": self.slug},
             "operationName": "questionData"
         }
         r = self.auth.retrieve(GRAPHQL_URL, new_headers, "POST", json.dumps(body))
@@ -99,24 +99,22 @@ class Quiz(object):
 
     @trace
     def submit(self, code):
-        body = { 'question_id': self.id,
+        body = {'question_id': self.id,
                 'test_mode': False,
                 'lang': LANG_MAPPING.get(config.language, 'cpp'),
                 'judge_type': 'large',
                 'typed_code': code}
 
-        csrftoken = ''
-        for ck in self.auth.cookies:
-            if ck.name == 'csrftoken':
-                csrftoken = ck.value
+        csrftoken = self.auth.cookies['csrftoken']
+        extra_headers = {'Origin': BASE_URL,
+                         'Referer': self.url + '/?tab=Description',
+                         'DNT': '1',
+                         'Content-Type': 'application/json;charset=UTF-8',
+                         'Accept': 'application/json',
+                         'X-CSRFToken': csrftoken,
+                         'X-Requested-With': 'XMLHttpRequest'}
 
-        newheaders = merge_two_dicts(headers, {'Origin': BASE_URL,
-            'Referer': self.url + '/?tab=Description',
-            'DNT': '1',
-            'Content-Type': 'application/json;charset=UTF-8',
-            'Accept': 'application/json',
-            'X-CSRFToken': csrftoken,
-            'X-Requested-With': 'XMLHttpRequest'})
+        newheaders = merge_two_dicts(headers, extra_headers)
 
         r = self.auth.retrieve(self.url + '/submit/', method='POST', data=json.dumps(body), headers=newheaders)
         if r.status_code != 200:
@@ -124,7 +122,7 @@ class Quiz(object):
         text = r.text.encode('utf-8')
         try:
             data = json.loads(text)
-        except:
+        except Exception:
             return (False, text)
 
         if 'error' in data:
@@ -147,13 +145,10 @@ class Quiz(object):
             elif data['state'] == 'SUCCESS':
                 if 'run_success' in data:
                     if data['run_success']:
-                        return (0, data)#data['total_correct'], data['total_testcases'], data['status_runtime'])
+                        return (0, data)  # data['total_correct'], data['total_testcases'], data['status_runtime'])
                     else:
-                        return (-1, data)#data['compile_error'])
+                        return (-1, data)  # data['compile_error'])
                 else:
                     raise KeyError
         except KeyError:
             return (-2, 'Unknow error')
-
-
-

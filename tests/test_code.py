@@ -1,27 +1,30 @@
 import unittest
-import mock
+from pathlib import Path
+from unittest.mock import patch
 from leetcode.code import *
 
 class TestCode(unittest.TestCase):
 
-    @mock.patch('leetcode.code.os.path.exists')
+    @patch('leetcode.code.Path.exists')
     def test_unique_file_name(self, mock_exists):
         mock_exists.return_value = False
-        self.assertEqual(unique_file_name(''), '')
+        self.assertEqual(unique_file_name(''), Path(''))
 
         mock_exists.side_effect = [True, True, True, False]
-        self.assertEqual(unique_file_name('hello'), 'hello-2')
+        self.assertEqual(unique_file_name('hello'), Path('hello-2'))
 
         mock_exists.side_effect = [True, True, False]
-        self.assertEqual(unique_file_name('hello.txt'), 'hello-1.txt')
+        self.assertEqual(unique_file_name('hello.txt'), Path('hello-1.txt'))
 
         mock_exists.side_effect = [True, True, False]
-        self.assertEqual(unique_file_name('hello.'), 'hello-1.')
+        self.assertEqual(unique_file_name('hello.'), Path('hello.-1'))
 
-    @mock.patch('leetcode.code.config')
-    @mock.patch('leetcode.code.os.makedirs')
-    def test_get_code_file_path(self, mock_makedirs, mock_config):
+    @patch('leetcode.code.config')
+    @patch('leetcode.code.Path.mkdir')
+    @patch('leetcode.code.Path.exists')
+    def test_get_code_file_path(self, mock_exists, mock_makedirs, mock_config):
         mock_config.path = ''
         mock_config.ext = 'py'
-        self.assertEqual(get_code_file_path(1), '~/leetcode/1.py')
+        mock_exists.return_value = False
+        self.assertEqual(get_code_file_path(1), Path.home().joinpath('leetcode/1.py'))
         mock_makedirs.assert_called_once()

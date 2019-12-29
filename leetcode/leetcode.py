@@ -1,14 +1,10 @@
-import os
-import re
 import json
 import logging
-from bs4 import BeautifulSoup
 from .config import config
 from .auth import headers
-from .code import *
 from .trace import trace
 from .quiz import Quiz
-from .common import *
+from .common import API_URL, BASE_URL, merge_two_dicts, GRAPHQL_URL
 
 
 class Leetcode(object):
@@ -77,19 +73,19 @@ class Leetcode(object):
     }
 }"""
         extra_headers = {
-          'Origin': BASE_URL,
-          'Referer': BASE_URL,
-          'X-CSRFToken': self.auth.cookies["csrftoken"],
-          'Accept': '*/*',
-          'Accept-Encoding': 'gzip, deflate',
-          'Content-Type': 'application/json',
+            'Origin': BASE_URL,
+            'Referer': BASE_URL,
+            'X-CSRFToken': self.auth.cookies["csrftoken"],
+            'Accept': '*/*',
+            'Accept-Encoding': 'gzip, deflate',
+            'Content-Type': 'application/json',
         }
 
         new_headers = merge_two_dicts(extra_headers, headers)
         body = {
-          'query': query,
-          'operationName': None,
-          'variables': {}
+            'query': query,
+            'operationName': None,
+            'variables': {}
         }
 
         r = self.auth.retrieve(GRAPHQL_URL, headers=new_headers, method='POST', data=json.dumps(body))

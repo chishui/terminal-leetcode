@@ -1,14 +1,14 @@
-import os
 import json
 import urwid
 import logging
 from .viewhelper import vim_key_map
 
+
 class ResultView(urwid.Frame):
     '''
         Quiz Item Submission Result View
     '''
-    def __init__(self, quiz, host_view, result, loop = None):
+    def __init__(self, quiz, host_view, result, loop=None):
         self.quiz = quiz
         self.host_view = host_view
         self.result = result
@@ -17,32 +17,32 @@ class ResultView(urwid.Frame):
         if result:
             if 'status_code' not in result:
                 raise ValueError('Unknow result format: %s' % json.dumps(result))
-            if result['status_code'] is 20:
+            if result['status_code'] == 20:
                 self.listbox = self.make_compile_error_view()
-            elif result['status_code'] is 10:
+            elif result['status_code'] == 10:
                 self.listbox = self.make_success_view()
-            elif result['status_code'] is 11:
+            elif result['status_code'] == 11:
                 self.listbox = self.make_failed_view()
-            elif result['status_code'] is 12:# memeory limit exceeded
+            elif result['status_code'] == 12:  # memeory limit exceeded
                 self.listbox = self.make_unified_error_view("Memory Limit Exceeded")
-            elif result['status_code'] is 13:# output limit exceeded
+            elif result['status_code'] == 13:  # output limit exceeded
                 self.listbox = self.make_unified_error_view("Output Limit Exceeded")
-            elif result['status_code'] is 14:# timeout
+            elif result['status_code'] == 14:  # timeout
                 self.listbox = self.make_unified_error_view("Time Limit Exceeded")
-            elif result['status_code'] is 15:
+            elif result['status_code'] == 15:
                 self.listbox = self.make_runtime_error_view()
             else:
                 raise ValueError('Unknow status code: %d' % result['status_code'])
         else:
             raise ValueError('result shouldn\'t be None')
 
-        self.overlay = urwid.Overlay(urwid.LineBox(self.listbox), host_view,
+        self.overlay = urwid.Overlay(
+            urwid.LineBox(self.listbox), host_view,
             align='center', width=('relative', 95),
             valign='middle', height=('relative', 95),
             min_width=40, min_height=40)
 
-        footer = urwid.Pile([urwid.Text('Press Esc to close this view.', align='center'),
-            urwid.Divider()])
+        footer = urwid.Pile([urwid.Text('Press Esc to close this view.', align='center'), urwid.Divider()])
         urwid.Frame.__init__(self, self.overlay, footer=footer)
 
     def _append_stdout_if_non_empty(self, list_items):
@@ -64,9 +64,9 @@ class ResultView(urwid.Frame):
         runtime = urwid.Text('Run time: %s' % self.result['status_runtime'])
         result_header = urwid.Text('--- Run Code Result: ---', align='center')
         list_items = [
-                result_header,
-                blank, columns,
-                blank, runtime
+            result_header,
+            blank, columns,
+            blank, runtime
         ]
         self._append_stdout_if_non_empty(list_items)
         return urwid.Padding(urwid.ListBox(urwid.SimpleListWalker(list_items)), left=2, right=2)
@@ -87,12 +87,12 @@ class ResultView(urwid.Frame):
         expected_answer_header = urwid.Text('Expected answer:')
         expected_answer = urwid.Text(self.result['expected_output'])
         list_items = [
-                result_header,
-                blank, columns,
-                blank, passed_header, passed,
-                blank, your_input_header, your_input,
-                blank, your_answer_header, your_answer,
-                blank, expected_answer_header, expected_answer
+            result_header,
+            blank, columns,
+            blank, passed_header, passed,
+            blank, your_input_header, your_input,
+            blank, your_answer_header, your_answer,
+            blank, expected_answer_header, expected_answer
         ]
         self._append_stdout_if_non_empty(list_items)
         return urwid.Padding(urwid.ListBox(urwid.SimpleListWalker(list_items)), left=2, right=2)
@@ -111,11 +111,11 @@ class ResultView(urwid.Frame):
         expected_answer_header = urwid.Text('Expected answer:')
         expected_answer = urwid.Text('Unkown Error')
         list_items = [
-                result_header,
-                blank, column_wrap,
-                blank, your_input_header, your_input,
-                blank, your_answer_header, your_answer,
-                blank, expected_answer_header, expected_answer
+            result_header,
+            blank, column_wrap,
+            blank, your_input_header, your_input,
+            blank, your_answer_header, your_answer,
+            blank, expected_answer_header, expected_answer
         ]
         self._append_stdout_if_non_empty(list_items)
         return urwid.Padding(urwid.ListBox(urwid.SimpleListWalker(list_items)), left=2, right=2)
@@ -132,10 +132,10 @@ class ResultView(urwid.Frame):
         your_input_header = urwid.Text('Last input:')
         your_input = urwid.Text(self.result['last_testcase'])
         list_items = [
-                result_header,
-                blank, column_wrap,
-                blank, error_header, error_message,
-                blank, your_input_header, your_input,
+            result_header,
+            blank, column_wrap,
+            blank, error_header, error_message,
+            blank, your_input_header, your_input,
         ]
         self._append_stdout_if_non_empty(list_items)
         return urwid.Padding(urwid.ListBox(urwid.SimpleListWalker(list_items)), left=2, right=2)
@@ -163,10 +163,9 @@ class ResultView(urwid.Frame):
         self._append_stdout_if_non_empty(list_items)
         return urwid.Padding(urwid.ListBox(urwid.SimpleListWalker(list_items)), left=2, right=2)
 
-
     def keypress(self, size, key):
         key = vim_key_map(key)
-        if key is 'esc':
+        if key == 'esc':
             self.destroy()
         else:
             return urwid.Frame.keypress(self, size, key)
@@ -178,4 +177,3 @@ class ResultView(urwid.Frame):
     def destroy(self):
         if self.loop:
             self.loop.widget = self.host_view
-
