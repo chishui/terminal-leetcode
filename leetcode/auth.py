@@ -3,7 +3,6 @@ import logging
 import os
 import json
 from http import cookiejar
-from pycookiecheat import chrome_cookies
 from .config import config, CONFIG_FOLDER
 from .trace import trace
 
@@ -37,7 +36,11 @@ class Auth(object):
             pass
 
     def get_cookies_from_chrome(self):
-        self.cookies = chrome_cookies(BASE_URL)
+        try:
+            from pycookiecheat import chrome_cookies
+            self.cookies = chrome_cookies(BASE_URL)
+        except Exception:
+            logger.error("Cannot get cookies from chrome")
 
     @trace
     def login(self):
