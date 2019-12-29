@@ -1,10 +1,11 @@
 import os
-import ConfigParser
+import configparser
+from pathlib import Path
 
-HOME = os.path.expanduser('~')
-CONFIG_FOLDER = os.path.join(HOME, '.config', 'leetcode')
-CONFIG_FILE = os.path.join(CONFIG_FOLDER, 'config.cfg')
-TAG_FILE = os.path.join(CONFIG_FOLDER, 'tag.json')
+HOME = Path.home()
+CONFIG_FOLDER = HOME.joinpath('.config', 'leetcode')
+CONFIG_FILE = CONFIG_FOLDER.joinpath('config.cfg')
+TAG_FILE = CONFIG_FOLDER.joinpath('tag.json')
 
 class Config(object):
     '''
@@ -18,7 +19,7 @@ class Config(object):
         path # code path
     '''
     def __init__(self):
-        self.parser = ConfigParser.SafeConfigParser({'username' : '', 'password' : '',
+        self.parser = configparser.ConfigParser({'username' : '', 'password' : '',
                                                      'language' : 'C++', 'ext': '',
                                                      'path' : '', 'keep_quiz_detail': 'false',
                                                      'tmux_support': 'false'})
@@ -31,8 +32,8 @@ class Config(object):
         self.tmux_support = False
 
     def load(self):
-        if not os.path.exists(CONFIG_FILE):
-            return False
+        if not CONFIG_FILE.exists():
+            return True
 
         self.parser.read(CONFIG_FILE)
         if 'leetcode' not in self.parser.sections():

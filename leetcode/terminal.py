@@ -4,14 +4,14 @@ import logging
 from threading import Thread
 import urwid
 from .leetcode import Leetcode, Quiz
-from views.home import HomeView
-from views.detail import DetailView
-from views.help import HelpView
-from views.loading import *
-from views.viewhelper import *
-from views.result import ResultView
+from .views.home import HomeView
+from .views.detail import DetailView
+from .views.help import HelpView
+from .views.loading import *
+from .views.viewhelper import *
+from .views.result import ResultView
 from .config import config
-import auth
+from .auth import *
 from .code import *
 
 palette = [
@@ -25,10 +25,9 @@ palette = [
     ]
 
 class Terminal(object):
-    def __init__(self):
+    def __init__(self, auth):
         self.home_view = None
         self.loop = None
-        self.leetcode = Leetcode()
         self.help_view = None
         self.quit_confirm_view = None
         self.submit_confirm_view = None
@@ -36,6 +35,8 @@ class Terminal(object):
         self.detail_view = None
         self.search_view = None
         self.loading_view = None
+        self.auth = auth
+        self.leetcode = Leetcode(auth)
         self.logger = logging.getLogger(__name__)
 
     @property
@@ -152,7 +153,7 @@ class Terminal(object):
         if self.leetcode.is_login:
             columns = [
                 ('fixed', 15, urwid.Padding(urwid.AttrWrap(
-                    urwid.Text('%s' % config.username),
+                    urwid.Text('%s' % self.leetcode.username),
                     'head', ''))),
                 urwid.AttrWrap(urwid.Text('You have solved %d / %d problems. ' %
                     (len(self.leetcode.solved), len(self.leetcode.quizzes))), 'head', ''),
@@ -191,9 +192,9 @@ class Terminal(object):
         delay_refresh(self.loop)
 
     def run_retrieve_home(self):
-        self.leetcode.is_login = auth.is_login()
-        if not self.leetcode.is_login:
-            self.leetcode.is_login = auth.login()
+        #self.leetcode.is_login = is_login()
+        #if not self.leetcode.is_login:
+            #self.leetcode.is_login = login()
 
         if self.loading_view:
             self.loading_view.set_text('Loading')
@@ -263,7 +264,7 @@ class Terminal(object):
             self.loop.run()
         except KeyboardInterrupt:
             self.logger.info('Keyboard interrupt')
-        except Exception,e:
+        except Exception as e:
             self.logger.exception("Fatal error in main loop")
         finally:
             self.clear_thread()

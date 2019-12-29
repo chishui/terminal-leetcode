@@ -23,7 +23,7 @@ edit and share. You can find tag file of Facebook from tags directory.
 
 ---------------
 # Requirements
-- Python 2.7  
+- Python 3.7  
 - [Urwid](https://github.com/urwid/urwid)
 
 # Installation
@@ -48,6 +48,12 @@ To run the program, input ``leetcode`` in terminal
  $ leetcode
 ```
 ### Login
+#### Option 1
+This option will get your cookies from your browser and use those for any requests agains leetcode website. So 
+you need to sign in your account from your browser first. There may be some limitations, please refer to pycookiecheat 
+for its [documentation](https://github.com/n8henrie/pycookiecheat)
+
+#### Option 2 (No longer available)
 To login you need to create a config.cfg file in folder ~/.config/leetcode.  
 Input your username and password in config.cfg as:  
 ```

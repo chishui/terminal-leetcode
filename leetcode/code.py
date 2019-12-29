@@ -1,18 +1,22 @@
-import os
+import subprocess
+from pathlib import Path
 from functools import wraps
 from .config import CONFIG_FOLDER, config
-import subprocess
+from .trace import trace
+from .editor import edit
 
-SNIPPET_FOLDER = os.path.join(CONFIG_FOLDER, 'snippet')
-BEFORE = os.path.join(SNIPPET_FOLDER, 'before')
-AFTER = os.path.join(SNIPPET_FOLDER, 'after')
+SNIPPET_FOLDER = Path(CONFIG_FOLDER) / Path('snippet')
+BEFORE = SNIPPET_FOLDER.joinpath('before')
+AFTER = SNIPPET_FOLDER.joinpath('after')
 
+@trace
 def get_data(filepath):
-    if os.path.exists(filepath):
+    if filepath.exists():
         with open(filepath, 'r') as f:
             return f.read()
     return ''
 
+@trace
 def enhance_code(func):
     @wraps(func)
     def wrapper(code, language, filepath):
@@ -22,15 +26,16 @@ def enhance_code(func):
         return func(code, language, filepath)
     return wrapper
 
+@trace
 def generate_makefile(func):
     @wraps(func)
     def wrapper(code, language, filepath):
         if language != 'C++':
             return func(code, language, filepath)
-        directory = os.path.dirname(filepath)
-        filename = os.path.split(filepath)[-1]
-        name = filename.split('.')[0]
-        makefile = os.path.join(directory, 'Makefile')
+        directory = filepath.parent
+        filename = filepath.name
+        name = filepath.stem
+        makefile = directory.joinpath('Makefile')
         text = 'all: %s\n\t g++ -g -o %s %s -std=c++11' % (filename, name, filename)
         with open(makefile, 'w') as f:
             f.write(text)
@@ -46,30 +51,55 @@ def generate_makefile(func):
         #f.write(line.encode('utf8') + '\n')
     #f.write('*/\n')
 
+@trace
 def unique_file_name(filepath):
-    if not os.path.exists(filepath):
+    if isinstance(filepath, str):
+        filepath = Path(filepath)
+
+    if not filepath.exists():
         return filepath
 
-    path, ext = os.path.splitext(filepath)
-    path, filename = os.path.split(path)
+    path = filepath.parent
+    filename = filepath.stem
+    ext = filepath.suffix
     index = 1
-    while os.path.exists(filepath):
-        filepath =  os.path.join(path, filename + '-' + str(index) + ext)
+    while filepath.exists():
+        filepath = path / Path(filename + '-' + str(index) + ext)
         index = index + 1
     return filepath
 
+@trace
 def get_code_file_path(quiz_id):
     path = config.path
-    if not path:
-        path = '~/leetcode'
+    if not path or not Path(config.path).exists():
+        path = Path.home() / 'leetcode'
+        if not path.exists():
+            path.mkdir()
+    else:
+        path = Path(path)
 
-    if not os.path.exists(path):
-        os.makedirs(path)
+    return path / Path(str(quiz_id) + '.' + config.ext)
 
-    return os.path.join(path, str(quiz_id) + '.' + config.ext)
-
+@trace
 def get_code_for_submission(filepath):
     data = get_data(filepath)
     before = get_data(BEFORE)
     after = get_data(AFTER)
     return data.replace(before, '').replace(after, '')
+
+@trace
+def edit_code(quiz_id, code, newcode=False):
+    filepath = get_code_file_path(quiz_id)
+    if newcode:
+        filepath = unique_file_name(filepath)
+
+    code = prepare_code(code, config.language, filepath)
+    if not filepath.exists():
+        with open(filepath, 'w') as f:
+            f.write(code)
+    return filepath
+
+@enhance_code
+@generate_makefile
+def prepare_code(code, language, filepath):
+    return code

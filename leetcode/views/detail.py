@@ -9,6 +9,8 @@ from ..code import *
 from ..leetcode import BASE_URL
 from ..editor import edit
 from ..config import config
+from ..trace import trace
+from ..common import *
 
 class DetailView(urwid.Frame):
     '''
@@ -43,6 +45,7 @@ class DetailView(urwid.Frame):
 
         return text_widgets
 
+    @trace
     def keypress(self, size, key):
         key = vim_key_map(key)
         ignore_key = ('l', 'right', 'enter')
@@ -50,7 +53,7 @@ class DetailView(urwid.Frame):
             pass
         # edit sample code
         if key is 'e':
-            self.edit_code()
+            self.edit_code(False)
         # edit new sample code
         elif key is 'n':
             self.edit_code(True)
@@ -65,35 +68,16 @@ class DetailView(urwid.Frame):
         else:
             return urwid.Frame.keypress(self, size, key)
 
-    def edit_code(self, newcode=False):
-        filepath = get_code_file_path(self.quiz.id)
-        if newcode:
-            filepath = unique_file_name(filepath)
-
-        code = prepare_code(self.quiz.sample_code, config.language, filepath)
-        if not os.path.exists(filepath):
-            with open(filepath, 'w') as f:
-                #if config.keep_quiz_detail:
-                    #write_quiz_detail(self.data, f)
-                f.write(code)
+    def edit_code(self, newcode):
+        filepath = edit_code(self.quiz.id, self.quiz.sample_code, newcode)
         # open editor to edit code
         edit(filepath, self.loop)
 
+
     def get_discussion_url(self):
-        item_url = self.quiz.url.strip('/')
-        name = item_url.split('/')[-1]
-        url = self.quiz.discussion_url + '/' + name
-        return url
+        return f"{BASE_URL}/problems/{self.quiz.slug}/discuss"
 
     def get_solutions_url(self):
-        item_url = self.quiz.url.strip('/')
-        name = item_url.split('/')[-1]
-        url = '%s/problems/%s/#/solutions' % (BASE_URL, name)
-        return url
+        return f"{BASE_URL}/problems/{self.quiz.slug}/solution"
 
 
-
-@enhance_code
-@generate_makefile
-def prepare_code(code, language, filepath):
-    return code

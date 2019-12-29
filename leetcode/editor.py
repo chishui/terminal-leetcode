@@ -1,15 +1,16 @@
 import os
 import subprocess
-from views.viewhelper import *
+from pathlib import Path
+from .views.viewhelper import *
 from .config import config
 
 def edit(filepath, loop):
     editor = os.environ.get('EDITOR', 'vi').lower()
     # vim
     if editor == 'vi' or editor == 'vim':
-        cmd = editor + ' ' + filepath
-        current_directory = os.getcwd()
-        os.chdir(os.path.dirname(os.path.abspath(filepath)))
+        cmd = editor + ' ' + str(filepath)
+        current_directory = Path.cwd()
+        os.chdir(filepath.parent)
         if config.tmux_support and is_inside_tmux():
             open_in_new_tmux_window(cmd)
         else:
