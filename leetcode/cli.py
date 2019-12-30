@@ -1,6 +1,6 @@
 import argparse
-from .common import LANG_MAPPING
-from .config import config
+from .helper.common import LANG_MAPPING
+from .helper.config import config
 from .__main__ import main as main_entry
 
 

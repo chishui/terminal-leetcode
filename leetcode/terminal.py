@@ -2,14 +2,14 @@ import sys
 import logging
 from threading import Thread
 import urwid
-from .leetcode import Leetcode
+from .client.leetcode import Leetcode
 from .views.home import HomeView
 from .views.detail import DetailView
 from .views.help import HelpView
 from .views.loading import LoadingView, Toast
 from .views.viewhelper import delay_refresh
 from .views.result import ResultView
-from .code import get_code_file_path, get_code_for_submission
+from .coding.code import get_code_file_path, get_code_for_submission
 
 palette = [
     ('body', 'dark cyan', ''),
@@ -23,7 +23,7 @@ palette = [
 
 
 class Terminal(object):
-    def __init__(self, auth):
+    def __init__(self):
         self.home_view = None
         self.loop = None
         self.help_view = None
@@ -33,8 +33,7 @@ class Terminal(object):
         self.detail_view = None
         self.search_view = None
         self.loading_view = None
-        self.auth = auth
-        self.leetcode = Leetcode(auth)
+        self.leetcode = Leetcode()
         self.logger = logging.getLogger(__name__)
 
     @property
@@ -155,6 +154,7 @@ class Terminal(object):
                     'head', ''))),
                 urwid.AttrWrap(urwid.Text('You have solved %d / %d problems. ' % (
                     len(self.leetcode.solved), len(self.leetcode.quizzes))), 'head', ''),
+                urwid.AttrWrap(urwid.Text(('Premium ' if self.leetcode.is_paid else 'Free '), align="right"), 'head', ''),
             ]
             return urwid.Columns(columns)
         else:

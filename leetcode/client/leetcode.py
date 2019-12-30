@@ -1,16 +1,16 @@
 import json
 import logging
-from .config import config
-from .auth import headers
-from .trace import trace
+from .auth import Auth, headers
 from .quiz import Quiz
-from .common import API_URL, BASE_URL, merge_two_dicts, GRAPHQL_URL
+from ..helper.trace import trace
+from ..helper.config import config
+from ..helper.common import API_URL, BASE_URL, merge_two_dicts, GRAPHQL_URL
 
 
 class Leetcode(object):
-    def __init__(self, auth):
+    def __init__(self):
         self.quizzes = []
-        self.auth = auth
+        self.auth = Auth()
         self.logger = logging.getLogger(__name__)
         self.username = ""
         self.is_paid = False

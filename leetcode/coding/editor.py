@@ -1,8 +1,8 @@
 import os
 import subprocess
 from pathlib import Path
-from .views.viewhelper import delay_refresh_detail
-from .config import config
+from ..views.viewhelper import delay_refresh_detail
+from ..helper.config import config
 
 
 def edit(filepath: Path, loop):

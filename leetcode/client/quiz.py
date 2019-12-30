@@ -1,9 +1,9 @@
 import json
 import logging
 from bs4 import BeautifulSoup
-from .config import config
-from .trace import trace
-from .common import BASE_URL, merge_two_dicts, GRAPHQL_URL, LANG_MAPPING, SUBMISSION_URL
+from ..helper.config import config
+from ..helper.trace import trace
+from ..helper.common import BASE_URL, merge_two_dicts, GRAPHQL_URL, LANG_MAPPING, SUBMISSION_URL
 from .auth import headers
 
 

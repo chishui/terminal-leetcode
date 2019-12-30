@@ -1,7 +1,7 @@
 from pathlib import Path
 from functools import wraps
-from .config import CONFIG_FOLDER, config
-from .trace import trace
+from ..helper.config import CONFIG_FOLDER, config
+from ..helper.trace import trace
 
 SNIPPET_FOLDER = Path(CONFIG_FOLDER) / Path('snippet')
 BEFORE = SNIPPET_FOLDER.joinpath('before')

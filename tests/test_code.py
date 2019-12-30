@@ -1,11 +1,11 @@
 import unittest
 from pathlib import Path
 from unittest.mock import patch
-from leetcode.code import *
+from leetcode.coding.code import *
 
 class TestCode(unittest.TestCase):
 
-    @patch('leetcode.code.Path.exists')
+    @patch('leetcode.coding.code.Path.exists')
     def test_unique_file_name(self, mock_exists):
         mock_exists.return_value = False
         self.assertEqual(unique_file_name(''), Path(''))
@@ -19,9 +19,9 @@ class TestCode(unittest.TestCase):
         mock_exists.side_effect = [True, True, False]
         self.assertEqual(unique_file_name('hello.'), Path('hello.-1'))
 
-    @patch('leetcode.code.config')
-    @patch('leetcode.code.Path.mkdir')
-    @patch('leetcode.code.Path.exists')
+    @patch('leetcode.coding.code.config')
+    @patch('leetcode.coding.code.Path.mkdir')
+    @patch('leetcode.coding.code.Path.exists')
     def test_get_code_file_path(self, mock_exists, mock_makedirs, mock_config):
         mock_config.path = ''
         mock_config.ext = 'py'

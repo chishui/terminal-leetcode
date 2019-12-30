@@ -1,8 +1,8 @@
 import unittest
 import os
 from unittest import mock
-from leetcode.auth import *
-from leetcode.config import *
+from leetcode.client.auth import *
+from leetcode.helper.config import *
 import requests_mock
 
 class TestAuth(unittest.TestCase):

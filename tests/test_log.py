@@ -2,7 +2,7 @@ import unittest
 import os
 from unittest import mock
 import json
-from leetcode.log import *
+from leetcode.helper.log import *
 
 data = '''
 {
@@ -30,8 +30,8 @@ data = '''
 
 class TestLog(unittest.TestCase) :
 
-    @mock.patch('leetcode.log.read_json_data')
-    @mock.patch('leetcode.log.os.path.exists')
+    @mock.patch('leetcode.helper.log.read_json_data')
+    @mock.patch('leetcode.helper.log.os.path.exists')
     def test_init_logger(self, mock_path, mock_read_data):
         mock_path.return_value = False
         init_logger()

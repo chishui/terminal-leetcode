@@ -2,10 +2,10 @@ import webbrowser
 import urwid
 import logging
 from .viewhelper import vim_key_map
-from ..code import edit_code
-from ..leetcode import BASE_URL
-from ..editor import edit
-from ..trace import trace
+from ..coding.code import edit_code
+from ..helper.common import BASE_URL
+from ..coding.editor import edit
+from ..helper.trace import trace
 
 
 class DetailView(urwid.Frame):

@@ -3,8 +3,8 @@ import logging
 import os
 import json
 from http import cookiejar
-from .config import config, CONFIG_FOLDER
-from .trace import trace
+from ..helper.config import config, CONFIG_FOLDER
+from ..helper.trace import trace
 
 BASE_URL = 'https://leetcode.com'
 LOGIN_URL = BASE_URL + '/accounts/login/'
