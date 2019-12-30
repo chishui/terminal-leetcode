@@ -49,7 +49,7 @@ class Leetcode(object):
                 data = Quiz(self.auth)
                 data.title = quiz['stat']['question__title']
                 data.slug = quiz['stat']['question__title_slug']
-                data.id = quiz['stat']['question_id']
+                data.id = quiz['stat']['frontend_question_id']
                 data.locked = not self.is_paid and quiz['paid_only']
                 data.difficulty = difficulty[quiz['difficulty']['level']]
                 data.favorite = quiz['is_favor']
