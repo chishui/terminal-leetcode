@@ -2,7 +2,7 @@ import time
 from threading import Thread
 import urwid
 from .viewhelper import delay_refresh
-from leetcode.model import EasyLock
+from ..helper.model import EasyLock
 
 
 class LoadingView(urwid.Frame):
