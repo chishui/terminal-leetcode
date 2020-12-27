@@ -3,7 +3,7 @@ import re
 import json
 import urwid
 from .viewhelper import vim_key_map
-from ..config import TAG_FILE
+from ..helper.config import TAG_FILE
 
 
 class ItemWidget(urwid.WidgetWrap):
