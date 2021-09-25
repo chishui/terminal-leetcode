@@ -7,6 +7,7 @@ SUBMISSION_URL = BASE_URL + '/submissions/detail/{id}/check/'
 LANG_MAPPING = {
     'C++': 'cpp',
     'Python': 'python',
+    'Python3': 'python3',
     'Java': 'java',
     'C': 'c',
     'C#': 'csharp',

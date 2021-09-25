@@ -62,6 +62,8 @@ class Process(object):
                 break
         if not quiz:
             return (False, None)
+        else:
+            quiz.load()
 
         code = self.get_code_from_quiz_id(id)
         success, text_or_id = quiz.submit(code)

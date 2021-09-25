@@ -9,7 +9,8 @@ from .auth import headers
 
 class Quiz(object):
     def __init__(self, auth):
-        self.id = None
+        self.id = None # question frontend id
+        self.real_quiz_id = None # question id of backend
         self.title = None
         self.content = None
         self.sample_code = None
@@ -24,10 +25,11 @@ class Quiz(object):
         self.html_content = None
         self.auth = auth
         self.slug = None
+        self.already_load = False
         self.logger = logging.getLogger(__name__)
 
     def load(self):
-        if not self.auth.is_login:
+        if not self.auth.is_login or self.already_load:
             return False
 
         query = """query questionData($titleSlug: String!) {
@@ -35,6 +37,7 @@ class Quiz(object):
         title
         titleSlug
         questionId
+        questionFrontendId
         content
         difficulty
         stats
@@ -85,10 +88,13 @@ class Quiz(object):
             self.html_content = obj["data"]["question"]["content"]
             content = obj["data"]["question"]["content"]
             bs = BeautifulSoup(content, "lxml")
+            self.id = obj["data"]["question"]["questionFrontendId"]
+            self.real_quiz_id = obj["data"]["question"]["questionId"]
             self.content = bs.get_text()
             self.content = self.content.replace(chr(13), '')
             self.sample_code = self._get_code_snippet(obj["data"]["question"]["codeSnippets"])
             self.tags = map(lambda x: x["name"], obj["data"]["question"]["topicTags"])
+            self.already_load = True
             return True
         except Exception:
             self.logger.error("Fatal error in main loop", exc_info=True)
@@ -104,7 +110,7 @@ class Quiz(object):
     def submit(self, code):
         if not self.auth.is_login:
             return (False, "")
-        body = {'question_id': self.id,
+        body = {'question_id': self.real_quiz_id,
                 'test_mode': False,
                 'lang': LANG_MAPPING.get(config.language, 'cpp'),
                 'judge_type': 'large',

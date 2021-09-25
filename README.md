@@ -12,7 +12,6 @@ This project is inspired by [RTV](https://github.com/michael-lazar/rtv).
 [![PyPI](https://img.shields.io/pypi/v/nine.svg?maxAge=2592000)](https://pypi.python.org/pypi/terminal-leetcode)
 [![PyPI](https://img.shields.io/badge/python-3.7-blue.svg?maxAge=2592000)](https://pypi.python.org/pypi/terminal-leetcode)  
 
-[Discuss in Slack](https://terminal-leetcode.slack.com)
 --------------
 # March 22th Update 
 #### Add code submit function.
@@ -29,7 +28,7 @@ edit and share. You can find tag file of Facebook from tags directory.
 # Installation
 Install with pip  
 ```
- $ pip install terminal-leetcode
+ $ pip3 install terminal-leetcode
 ```
 Clone the repository  
 ```
@@ -52,6 +51,8 @@ To run the program, input ``leetcode`` in terminal
 This option will get your cookies from your browser and use those for any requests agains leetcode website. So 
 you need to sign in your account from your browser first. There may be some limitations, please refer to pycookiecheat 
 for its [documentation](https://github.com/n8henrie/pycookiecheat)
+
+On Mac for the first time use, it will pop up a window and ask to input password of your computer.
 
 #### Option 2 (No longer available)
 To login you need to create a config.cfg file in folder ~/.config/leetcode.  

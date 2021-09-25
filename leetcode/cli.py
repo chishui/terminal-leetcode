@@ -50,7 +50,7 @@ submit  submit your code
         try:
             parser = argparse.ArgumentParser(
                 description='submit your code for online judge',
-                usage='leetcode submit --id [problem id]')
+                usage='leetcode submit --id [problem frontend id]')
             parser.add_argument('--id', type=int, required=True, help='set problem id')
             args = parser.parse_args(sys.argv[2:])
             if args.id:

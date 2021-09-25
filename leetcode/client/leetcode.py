@@ -50,6 +50,7 @@ class Leetcode(object):
                 data.title = quiz['stat']['question__title']
                 data.slug = quiz['stat']['question__title_slug']
                 data.id = quiz['stat']['frontend_question_id']
+                data.real_quiz_id = data.id # default real_quiz_id to frontend id
                 data.locked = not self.is_paid and quiz['paid_only']
                 data.difficulty = difficulty[quiz['difficulty']['level']]
                 data.favorite = quiz['is_favor']

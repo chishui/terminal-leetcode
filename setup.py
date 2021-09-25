@@ -10,7 +10,7 @@ requirements = ['urwid', 'requests', 'bs4', 'lxml', 'decorator', 'pycookiecheat'
 
 setup(
     name="terminal-leetcode",
-    version="0.0.18",
+    version="0.0.20",
     author="Liyun Xiu",
     author_email="chishui2@gmail.com",
     description="A terminal based leetcode website viewer",
