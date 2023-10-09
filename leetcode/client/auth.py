@@ -3,7 +3,7 @@ import logging
 import os
 import json
 from http import cookiejar
-from ..helper.config import config, CONFIG_FOLDER
+from ..helper.config import HOME, config, CONFIG_FOLDER
 from ..helper.trace import trace
 
 BASE_URL = 'https://leetcode.com'
@@ -25,7 +25,12 @@ logger = logging.getLogger(__name__)
 class Auth(object):
     def __init__(self):
         self.cookies = None
-        self.get_cookies_from_chrome()
+        if os.path.exists(HOME.joinpath('.mozilla', 'firefox')):
+            self.get_cookies_from_firefox()
+        elif os.path.exists(HOME.joinpath('.config', 'google-chrome')): 
+            self.get_cookies_from_chrome()
+        else:
+            self.get_cookies_from_local_file()
 
     def get_cookies_from_local_file(self):
         COOKIE_PATH = os.path.join(CONFIG_FOLDER, 'cookies')
@@ -35,7 +40,14 @@ class Auth(object):
         except Exception:
             pass
 
+    def get_cookies_from_firefox(self):
+        try:
+            from pycookiecheat import firefox_cookies
+            self.cookies = firefox_cookies(BASE_URL)
+        except Exception:
+            logger.error("Cannot get cookies from firefox")
     def get_cookies_from_chrome(self):
+        logger.info("Attempting to get cookies from chrome...")
         try:
             from pycookiecheat import chrome_cookies
             self.cookies = chrome_cookies(BASE_URL)
